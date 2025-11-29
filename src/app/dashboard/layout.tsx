@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { PageLoader } from "@/components/shared/LoadingStates";
 import { getAuthState } from "@/services/auth.service";
@@ -61,9 +62,10 @@ export default function DashboardLayout({
     <LanguageProvider>
       <div className="flex h-screen bg-background">
         <Sidebar user={{ email: user.email, name: user.name }} />
-        <main className="flex-1 overflow-y-auto scrollbar-thin">
-          <div className="min-h-full">{children}</div>
+        <main className="flex-1 overflow-y-auto scrollbar-thin pb-20 lg:pb-0">
+          <div className="min-h-full page-content">{children}</div>
         </main>
+        <MobileBottomNav />
       </div>
     </LanguageProvider>
   );

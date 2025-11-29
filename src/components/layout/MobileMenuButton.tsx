@@ -14,7 +14,7 @@ export function MobileMenuButton({ isOpen, onToggle }: MobileMenuButtonProps) {
       variant="outline"
       size="icon"
       onClick={onToggle}
-      className="lg:hidden fixed top-4 left-4 z-50"
+      className="hidden md:flex lg:hidden fixed top-4 left-4 z-50 glass border-white/10"
     >
       {isOpen ? <X size={24} /> : <Menu size={24} />}
     </Button>

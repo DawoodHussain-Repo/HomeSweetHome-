@@ -116,49 +116,59 @@
    ============================================================================= */
 
 .dark {
-  --background: oklch(0.12 0.015 250);
-  --foreground: oklch(0.96 0.008 250);
+  /* True Black Background */
+  --background: oklch(0 0 0);
+  --foreground: oklch(0.98 0 0);
 
-  --card: oklch(0.16 0.02 250);
-  --card-foreground: oklch(0.96 0.008 250);
-  --popover: oklch(0.16 0.02 250);
-  --popover-foreground: oklch(0.96 0.008 250);
+  /* Glassmorphism Cards - semi-transparent with blur */
+  --card: oklch(0.12 0.01 250 / 0.6);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.1 0.01 250 / 0.85);
+  --popover-foreground: oklch(0.98 0 0);
 
-  --primary: oklch(0.62 0.16 250);
-  --primary-foreground: oklch(0.08 0.015 250);
+  /* Primary Blue - vibrant for dark mode */
+  --primary: oklch(0.68 0.2 250);
+  --primary-foreground: oklch(0 0 0);
 
-  --secondary: oklch(0.22 0.025 250);
-  --secondary-foreground: oklch(0.92 0.008 250);
+  /* Secondary - glass effect */
+  --secondary: oklch(0.2 0.015 250 / 0.5);
+  --secondary-foreground: oklch(0.95 0 0);
 
-  --muted: oklch(0.2 0.018 250);
-  --muted-foreground: oklch(0.6 0.018 250);
+  /* Muted - subtle glass */
+  --muted: oklch(0.18 0.01 250 / 0.4);
+  --muted-foreground: oklch(0.6 0.01 250);
 
-  --accent: oklch(0.25 0.03 250);
-  --accent-foreground: oklch(0.92 0.008 250);
+  /* Accent - glass highlight */
+  --accent: oklch(0.25 0.02 250 / 0.5);
+  --accent-foreground: oklch(0.95 0 0);
 
-  --destructive: oklch(0.6 0.18 20);
-  --success: oklch(0.58 0.16 145);
-  --warning: oklch(0.72 0.14 70);
-  --info: oklch(0.62 0.16 250);
+  /* Semantic Colors - vibrant for visibility */
+  --destructive: oklch(0.65 0.22 20);
+  --success: oklch(0.65 0.2 145);
+  --warning: oklch(0.78 0.18 70);
+  --info: oklch(0.68 0.2 250);
 
-  --border: oklch(0.25 0.018 250);
-  --input: oklch(0.22 0.018 250);
-  --ring: oklch(0.62 0.16 250);
+  /* Borders - visible but subtle glass */
+  --border: oklch(0.3 0.02 250 / 0.4);
+  --input: oklch(0.15 0.01 250 / 0.7);
+  --ring: oklch(0.68 0.2 250);
 
-  --chart-1: oklch(0.62 0.16 250);
-  --chart-2: oklch(0.58 0.16 145);
-  --chart-3: oklch(0.65 0.14 200);
-  --chart-4: oklch(0.68 0.16 280);
-  --chart-5: oklch(0.72 0.14 70);
+  /* Charts - vibrant */
+  --chart-1: oklch(0.68 0.2 250);
+  --chart-2: oklch(0.65 0.2 145);
+  --chart-3: oklch(0.7 0.18 200);
+  --chart-4: oklch(0.72 0.18 280);
+  --chart-5: oklch(0.78 0.18 70);
 
-  --sidebar: oklch(0.14 0.018 250);
-  --sidebar-foreground: oklch(0.96 0.008 250);
-  --sidebar-primary: oklch(0.62 0.16 250);
-  --sidebar-primary-foreground: oklch(0.08 0.015 250);
-  --sidebar-accent: oklch(0.2 0.022 250);
-  --sidebar-accent-foreground: oklch(0.92 0.008 250);
-  --sidebar-border: oklch(0.22 0.018 250);
-  --sidebar-ring: oklch(0.62 0.16 250);
+  /* Sidebar - glass effect */
+  --sidebar: oklch(0.06 0.01 250 / 0.85);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.68 0.2 250);
+  --sidebar-primary-foreground: oklch(0 0 0);
+  --sidebar-accent: oklch(0.2 0.015 250 / 0.5);
+  --sidebar-accent-foreground: oklch(0.95 0 0);
+  --sidebar-border: oklch(0.25 0.015 250 / 0.4);
+  --sidebar-ring: oklch(0.68 0.2 250);
 }
 
 /* =============================================================================
@@ -179,11 +189,13 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   }
 
   /* Typography Scale */
   h1 {
     @apply text-3xl font-bold tracking-tight;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   }
   h2 {
     @apply text-2xl font-semibold tracking-tight;
@@ -202,7 +214,7 @@
 
   /* Selection */
   ::selection {
-    @apply bg-primary/20 text-foreground;
+    @apply bg-primary/30 text-foreground;
   }
 }
 
@@ -211,13 +223,38 @@
    ============================================================================= */
 
 @layer components {
+  /* Glassmorphism Card */
+  .glass-card {
+    @apply backdrop-blur-xl border border-white/10 shadow-xl;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+  }
+
+  .dark .glass-card {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   /* Premium Card Hover Effects */
   .card-hover {
-    @apply transition-all duration-200;
+    @apply transition-all duration-300 ease-out;
   }
 
   .card-hover:hover {
-    @apply shadow-lg shadow-primary/5 -translate-y-0.5;
+    @apply shadow-xl -translate-y-1;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+  }
+
+  .dark .card-hover:hover {
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 
   /* Gradient Text */
@@ -227,7 +264,30 @@
 
   /* Glass Effect */
   .glass {
-    @apply bg-background/80 backdrop-blur-lg border border-border/50;
+    @apply backdrop-blur-xl border border-white/10;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .dark .glass {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Glassmorphism Table */
+  .glass-table {
+    @apply backdrop-blur-lg rounded-lg overflow-hidden;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+  }
+
+  .dark .glass-table {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
   }
 
   /* Subtle Glow */
@@ -236,7 +296,7 @@
   }
 
   .dark .glow {
-    box-shadow: 0 0 40px -10px oklch(0.62 0.16 250 / 0.2);
+    box-shadow: 0 0 60px -15px oklch(0.68 0.2 250 / 0.25);
   }
 }
 
@@ -245,9 +305,54 @@
    ============================================================================= */
 
 @layer utilities {
-  /* Urdu/Arabic Font */
+  /* Mobile-First Spacing */
+  .container-padding {
+    @apply px-4 py-4 sm:px-6 sm:py-6 lg:px-8;
+  }
+
+  .section-spacing {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  .card-padding {
+    @apply p-4 sm:p-6;
+  }
+
+  /* Mobile-Optimized Typography */
+  .heading-primary {
+    @apply text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight;
+  }
+
+  .heading-secondary {
+    @apply text-lg sm:text-xl lg:text-2xl font-semibold;
+  }
+
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+
+  /* Mobile Grid Utilities */
+  .stats-grid {
+    @apply grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4;
+  }
+
+  /* Page Content Padding */
+  .page-content {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
+  /* Urdu/Arabic Font - Premium Nastaliq */
   .font-urdu {
-    font-family: "Jameel Noori Nastaleeq", "Noto Nastaliq Urdu", serif;
+    font-family: "Mehr Nastaliq", "Jameel Noori Nastaleeq", "Noto Nastaliq Urdu",
+      "Nafees Nastaleeq", serif;
+    line-height: 2;
+    font-size: 1.1em;
+  }
+
+  /* English Premium Font */
+  .font-english {
+    font-family: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    letter-spacing: -0.01em;
   }
 
   /* Smooth Number Transitions */
@@ -265,10 +370,10 @@
     display: none;
   }
 
-  /* Custom scrollbar */
+  /* Custom scrollbar - dark mode optimized */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: oklch(0.8 0 0) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -281,12 +386,12 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: oklch(0.8 0 0);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.7 0 0);
+    background: rgba(255, 255, 255, 0.3);
   }
 
   /* Animation Utilities */
@@ -318,6 +423,29 @@
     50% {
       opacity: 0.5;
     }
+  }
+
+  /* iOS Safe Area Support */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  /* iOS-style bottom nav blur */
+  .ios-nav-blur {
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
 }
 

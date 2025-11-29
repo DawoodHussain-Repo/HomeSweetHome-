@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import {
   Plus,
   Save,
@@ -156,21 +157,19 @@ export default function VouchersPage() {
 
   // Get next voucher number
   const getNextVoucherNo = useCallback(async () => {
-    const typeCode = VOUCHER_TYPE_CODES[voucherType];
     const prefix = voucherType.charAt(0).toUpperCase();
     const yearMonth = format(new Date(voucherDate), "yyyyMM");
 
     const { data } = await supabase
-      .from("vouchers")
-      .select("voucher_no")
-      .eq("voucher_type", typeCode)
-      .like("voucher_no", `${prefix}-${yearMonth}-%`)
-      .order("voucher_no", { ascending: false })
+      .from("transactions")
+      .select("voucher_number")
+      .like("voucher_number", `${prefix}-${yearMonth}-%`)
+      .order("voucher_number", { ascending: false })
       .limit(1);
 
     let nextNum = 1;
-    if (data && data.length > 0) {
-      const lastNo = data[0].voucher_no;
+    if (data && data.length > 0 && data[0].voucher_number) {
+      const lastNo = data[0].voucher_number;
       const parts = lastNo.split("-");
       if (parts.length === 3) {
         nextNum = parseInt(parts[2], 10) + 1;
@@ -221,16 +220,22 @@ export default function VouchersPage() {
     }
   };
 
-  // Update journal line
+  // Update journal line - supports single field or multiple fields
   const updateJournalLine = (
     id: string,
-    field: keyof JournalLine,
-    value: string | number
+    fieldOrUpdates: keyof JournalLine | Partial<JournalLine>,
+    value?: string | number
   ) => {
-    setJournalLines(
-      journalLines.map((line) =>
-        line.id === id ? { ...line, [field]: value } : line
-      )
+    setJournalLines((prevLines) =>
+      prevLines.map((line) => {
+        if (line.id !== id) return line;
+        // If fieldOrUpdates is a string, it's a single field update
+        if (typeof fieldOrUpdates === "string") {
+          return { ...line, [fieldOrUpdates]: value };
+        }
+        // Otherwise it's a partial update object
+        return { ...line, ...fieldOrUpdates };
+      })
     );
   };
 
@@ -290,6 +295,19 @@ export default function VouchersPage() {
         setMessage({ type: "error", text: "Debit and Credit must be equal" });
         return;
       }
+    } else if (voucherType === "opening") {
+      if (!selectedAccountId) {
+        setMessage({ type: "error", text: "Please select an account" });
+        return;
+      }
+      const numAmount = parseFloat(amount);
+      if (numAmount === 0 || isNaN(numAmount)) {
+        setMessage({
+          type: "error",
+          text: "Please enter a valid opening balance amount",
+        });
+        return;
+      }
     }
 
     setSaving(true);
@@ -300,103 +318,119 @@ export default function VouchersPage() {
       const typeCode = VOUCHER_TYPE_CODES[voucherType];
       const numAmount = parseFloat(amount) || 0;
 
-      // Create voucher
-      const { data: voucher, error: voucherError } = await supabase
-        .from("vouchers")
+      // Create transaction (voucher header) using voucher_type_code directly
+      const { data: transaction, error: txError } = await supabase
+        .from("transactions")
         .insert({
-          voucher_no: voucherNo,
-          voucher_date: voucherDate,
-          voucher_type: typeCode,
+          user_id: userId,
+          transaction_date: voucherDate,
+          voucher_type_code: typeCode,
+          voucher_number: voucherNo,
           narration: narration || null,
           total_amount:
             voucherType === "journal" ? journalTotals.debit : numAmount,
-          status: "posted",
-          created_by: userId,
+          is_posted: true,
         })
         .select()
         .single();
 
-      if (voucherError) throw voucherError;
+      if (txError) throw txError;
 
-      // Create transactions
-      const transactions: {
-        voucher_id: string;
+      // Create transaction details (line items)
+      const details: {
+        transaction_id: string;
         account_id: string;
         debit_amount: number;
         credit_amount: number;
-        narration: string | null;
+        description: string | null;
+        line_order: number;
       }[] = [];
 
       if (voucherType === "receipt") {
         // Cash Receipt: Debit Cash, Credit selected account
-        transactions.push({
-          voucher_id: voucher.id,
+        details.push({
+          transaction_id: transaction.id,
           account_id: cashAccount!.id,
           debit_amount: numAmount,
           credit_amount: 0,
-          narration: narration || null,
+          description: narration || null,
+          line_order: 0,
         });
-        transactions.push({
-          voucher_id: voucher.id,
+        details.push({
+          transaction_id: transaction.id,
           account_id: selectedAccountId,
           debit_amount: 0,
           credit_amount: numAmount,
-          narration: narration || null,
+          description: narration || null,
+          line_order: 1,
         });
       } else if (voucherType === "payment") {
         // Cash Payment: Credit Cash, Debit selected account
-        transactions.push({
-          voucher_id: voucher.id,
+        details.push({
+          transaction_id: transaction.id,
           account_id: selectedAccountId,
           debit_amount: numAmount,
           credit_amount: 0,
-          narration: narration || null,
+          description: narration || null,
+          line_order: 0,
         });
-        transactions.push({
-          voucher_id: voucher.id,
+        details.push({
+          transaction_id: transaction.id,
           account_id: cashAccount!.id,
           debit_amount: 0,
           credit_amount: numAmount,
-          narration: narration || null,
+          description: narration || null,
+          line_order: 1,
         });
       } else if (voucherType === "journal") {
-        // Journal: Multiple lines as entered
-        for (const line of journalLines) {
+        // Journal: Multiple lines as entered with account names
+        journalLines.forEach((line, index) => {
           if (line.accountId && (line.debit > 0 || line.credit > 0)) {
-            transactions.push({
-              voucher_id: voucher.id,
+            details.push({
+              transaction_id: transaction.id,
               account_id: line.accountId,
               debit_amount: line.debit || 0,
               credit_amount: line.credit || 0,
-              narration: narration || null,
+              description: line.accountName || narration || null,
+              line_order: index,
             });
           }
-        }
+        });
       } else if (voucherType === "opening") {
         // Opening: Single entry based on amount sign
         if (numAmount > 0) {
-          transactions.push({
-            voucher_id: voucher.id,
+          details.push({
+            transaction_id: transaction.id,
             account_id: selectedAccountId,
             debit_amount: numAmount,
             credit_amount: 0,
-            narration: narration || "Opening Balance",
+            description: narration || "Opening Balance",
+            line_order: 0,
           });
         } else {
-          transactions.push({
-            voucher_id: voucher.id,
+          details.push({
+            transaction_id: transaction.id,
             account_id: selectedAccountId,
             debit_amount: 0,
             credit_amount: Math.abs(numAmount),
-            narration: narration || "Opening Balance",
+            description: narration || "Opening Balance",
+            line_order: 0,
           });
         }
       }
 
-      const { error: txError } = await supabase
-        .from("transactions")
-        .insert(transactions);
-      if (txError) throw txError;
+      const { error: detailsError } = await supabase
+        .from("transaction_details")
+        .insert(details);
+      if (detailsError) throw detailsError;
+
+      // Show success toast
+      toast.success(`Voucher ${voucherNo} saved successfully!`, {
+        description: `${
+          voucherType.charAt(0).toUpperCase() + voucherType.slice(1)
+        } voucher created`,
+        duration: 4000,
+      });
 
       setMessage({
         type: "success",
@@ -404,11 +438,33 @@ export default function VouchersPage() {
       });
       setLastVoucherNo(voucherNo);
       resetForm();
-    } catch (error) {
-      console.error("Save error:", error);
+    } catch (error: unknown) {
+      let errorMessage = "Unknown error occurred";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === "object" && error !== null) {
+        // Handle Supabase error objects
+        const errObj = error as {
+          message?: string;
+          details?: string;
+          hint?: string;
+          code?: string;
+        };
+        errorMessage =
+          errObj.message || errObj.details || JSON.stringify(error);
+        if (errObj.hint) errorMessage += ` (Hint: ${errObj.hint})`;
+      }
+      console.error("Save error:", errorMessage, error);
+
+      // Show error toast
+      toast.error("Failed to save voucher", {
+        description: errorMessage,
+        duration: 5000,
+      });
+
       setMessage({
         type: "error",
-        text: "Failed to save voucher. Please try again.",
+        text: `Failed to save voucher: ${errorMessage}`,
       });
     } finally {
       setSaving(false);
@@ -444,17 +500,17 @@ export default function VouchersPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Voucher Entry</h1>
-          <p className="text-muted-foreground">
+          <h1 className="heading-primary">Voucher Entry</h1>
+          <p className="text-muted-foreground text-sm sm:text-base mt-1">
             Create cash receipts, payments, and journal entries
           </p>
         </div>
         {lastVoucherNo && (
-          <Badge variant="outline" className="text-sm py-1 px-3">
+          <Badge variant="outline" className="text-sm py-1 px-3 glass">
             Last: {lastVoucherNo}
           </Badge>
         )}
@@ -483,7 +539,7 @@ export default function VouchersPage() {
       )}
 
       {/* Main Form Card */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader className="pb-4">
           <Tabs
             value={voucherType}
@@ -542,13 +598,13 @@ export default function VouchersPage() {
           {/* Cash Receipt Form */}
           {voucherType === "receipt" && (
             <div className="space-y-4">
-              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+              <div className="glass p-4 rounded-lg border border-blue-500/20">
+                <p className="text-sm text-blue-400">
                   <strong>Cash Receipt:</strong> Money received into Cash
                   account from another account. Cash will be{" "}
-                  <span className="font-semibold">debited</span>, and the
-                  selected account will be{" "}
-                  <span className="font-semibold">credited</span>.
+                  <span className="font-semibold text-green-400">debited</span>,
+                  and the selected account will be{" "}
+                  <span className="font-semibold text-red-400">credited</span>.
                 </p>
               </div>
 
@@ -580,16 +636,13 @@ export default function VouchersPage() {
               </div>
 
               {cashAccount && (
-                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    Cash Account:{" "}
-                    <span className="font-medium text-foreground">
-                      {cashAccount.account_name}
-                    </span>
-                    <span className="ml-2 font-mono text-xs">
-                      ({cashAccount.account_code})
-                    </span>
-                  </p>
+                <div className="glass p-3 rounded-lg border border-primary/20 flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    Cash A/C:
+                  </span>
+                  <span className="text-sm font-medium text-primary">
+                    {cashAccount.account_name}
+                  </span>
                 </div>
               )}
             </div>
@@ -598,12 +651,13 @@ export default function VouchersPage() {
           {/* Cash Payment Form */}
           {voucherType === "payment" && (
             <div className="space-y-4">
-              <div className="bg-orange-50 dark:bg-orange-950 p-4 rounded-lg">
-                <p className="text-sm text-orange-700 dark:text-orange-300">
+              <div className="glass p-4 rounded-lg border border-orange-500/20">
+                <p className="text-sm text-orange-400">
                   <strong>Cash Payment:</strong> Money paid from Cash account to
                   another account. The selected account will be{" "}
-                  <span className="font-semibold">debited</span>, and Cash will
-                  be <span className="font-semibold">credited</span>.
+                  <span className="font-semibold text-green-400">debited</span>,
+                  and Cash will be{" "}
+                  <span className="font-semibold text-red-400">credited</span>.
                 </p>
               </div>
 
@@ -635,16 +689,13 @@ export default function VouchersPage() {
               </div>
 
               {cashAccount && (
-                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    Cash Account:{" "}
-                    <span className="font-medium text-foreground">
-                      {cashAccount.account_name}
-                    </span>
-                    <span className="ml-2 font-mono text-xs">
-                      ({cashAccount.account_code})
-                    </span>
-                  </p>
+                <div className="glass p-3 rounded-lg border border-primary/20 flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    Cash A/C:
+                  </span>
+                  <span className="text-sm font-medium text-primary">
+                    {cashAccount.account_name}
+                  </span>
                 </div>
               )}
             </div>
@@ -653,14 +704,14 @@ export default function VouchersPage() {
           {/* Journal Entry Form */}
           {voucherType === "journal" && (
             <div className="space-y-4">
-              <div className="bg-purple-50 dark:bg-purple-950 p-4 rounded-lg">
-                <p className="text-sm text-purple-700 dark:text-purple-300">
+              <div className="glass p-4 rounded-lg border border-purple-500/20">
+                <p className="text-sm text-purple-400">
                   <strong>Journal Entry:</strong> Record transfers between any
                   accounts. Total debits must equal total credits.
                 </p>
               </div>
 
-              <Table>
+              <Table className="glass-table">
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[40%]">Account</TableHead>
@@ -676,12 +727,10 @@ export default function VouchersPage() {
                         <SearchableAccountSelect
                           value={line.accountId}
                           onValueChange={(id, account) => {
-                            updateJournalLine(line.id, "accountId", id);
-                            updateJournalLine(
-                              line.id,
-                              "accountName",
-                              account?.account_name || ""
-                            );
+                            updateJournalLine(line.id, {
+                              accountId: id,
+                              accountName: account?.account_name || "",
+                            });
                           }}
                           placeholder="Select account..."
                         />
@@ -733,7 +782,7 @@ export default function VouchersPage() {
                     </TableRow>
                   ))}
                   {/* Totals Row */}
-                  <TableRow className="bg-muted/50 font-medium">
+                  <TableRow className="glass font-medium">
                     <TableCell>Total</TableCell>
                     <TableCell className="text-right">
                       {journalTotals.debit.toLocaleString("en-PK", {
@@ -780,11 +829,13 @@ export default function VouchersPage() {
           {/* Opening Balance Form */}
           {voucherType === "opening" && (
             <div className="space-y-4">
-              <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
-                <p className="text-sm text-green-700 dark:text-green-300">
+              <div className="glass p-4 rounded-lg border border-green-500/20">
+                <p className="text-sm text-green-400">
                   <strong>Opening Balance:</strong> Set initial balance for an
-                  account. Positive amount = Debit balance, Negative amount =
-                  Credit balance.
+                  account. Positive amount ={" "}
+                  <span className="font-semibold">Debit</span> balance, Negative
+                  amount =<span className="font-semibold"> Credit</span>{" "}
+                  balance.
                 </p>
               </div>
 

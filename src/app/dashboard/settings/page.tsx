@@ -90,10 +90,10 @@ export default function SettingsPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-foreground">
           {t("nav.settings")}
         </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-muted-foreground mt-1">
           Manage your company settings and preferences
         </p>
       </div>
@@ -101,10 +101,10 @@ export default function SettingsPage() {
       {/* Message */}
       {message && (
         <div
-          className={`p-4 rounded-lg ${
+          className={`p-4 rounded-lg glass ${
             message.type === "success"
-              ? "bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800"
-              : "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+              ? "text-green-400 border border-green-500/30"
+              : "text-red-400 border border-red-500/30"
           }`}
         >
           {message.text}
@@ -112,19 +112,19 @@ export default function SettingsPage() {
       )}
 
       {/* Company Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="glass-card rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-            <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <Building2 className="w-5 h-5 text-blue-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             Company Information
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Company Name (English)
             </label>
             <input
@@ -133,12 +133,12 @@ export default function SettingsPage() {
               onChange={(e) =>
                 setCompanyInfo({ ...companyInfo, company_name: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
               placeholder="Your Company Name"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Company Name (اردو)
             </label>
             <input
@@ -151,12 +151,12 @@ export default function SettingsPage() {
                   company_name_urdu: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground font-urdu"
               placeholder="کمپنی کا نام"
             />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Address
             </label>
             <textarea
@@ -165,12 +165,12 @@ export default function SettingsPage() {
                 setCompanyInfo({ ...companyInfo, address: e.target.value })
               }
               rows={2}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
               placeholder="Company Address"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Phone Numbers
             </label>
             <input
@@ -182,12 +182,12 @@ export default function SettingsPage() {
                   phone_numbers: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
               placeholder="+92 XXX XXXXXXX"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Email
             </label>
             <input
@@ -196,12 +196,12 @@ export default function SettingsPage() {
               onChange={(e) =>
                 setCompanyInfo({ ...companyInfo, email: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
               placeholder="contact@company.com"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Fiscal Year Start
             </label>
             <input
@@ -213,11 +213,11 @@ export default function SettingsPage() {
                   fiscal_year_start: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-muted-foreground mb-1">
               Fiscal Year End
             </label>
             <input
@@ -229,26 +229,26 @@ export default function SettingsPage() {
                   fiscal_year_end: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground"
             />
           </div>
         </div>
       </div>
 
       {/* Language Settings */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="glass-card rounded-xl p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-            <Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+          <div className="p-2 bg-purple-500/20 rounded-lg">
+            <Globe className="w-5 h-5 text-purple-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             Language & Display
           </h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Interface Language
             </label>
             <div className="flex gap-4">
@@ -256,12 +256,12 @@ export default function SettingsPage() {
                 onClick={() => setLanguage("en")}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
                   language === "en"
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-                    : "border-gray-200 dark:border-gray-600 hover:border-emerald-300"
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-white/10 glass hover:border-primary/50"
                 }`}
               >
                 <div className="font-medium">English</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-sm text-muted-foreground">
                   Left to Right
                 </div>
               </button>
@@ -269,12 +269,12 @@ export default function SettingsPage() {
                 onClick={() => setLanguage("ur")}
                 className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
                   language === "ur"
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-                    : "border-gray-200 dark:border-gray-600 hover:border-emerald-300"
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-white/10 glass hover:border-primary/50"
                 }`}
               >
-                <div className="font-medium">اردو</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="font-medium font-urdu">اردو</div>
+                <div className="text-sm text-muted-foreground">
                   Right to Left
                 </div>
               </button>
@@ -288,10 +288,10 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium rounded-lg transition-colors"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium rounded-lg transition-colors"
         >
           {saving ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
           ) : (
             <Save size={20} />
           )}

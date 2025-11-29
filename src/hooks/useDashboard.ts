@@ -65,26 +65,43 @@ export function useDashboard(): UseDashboardReturn {
       setMonthlyData(monthly);
 
       // Transform recent transactions
+      // Data structure: transactions table with transaction_details as child and voucher_types
       const transformed: RecentTransaction[] = recent.map(
         (t: Record<string, unknown>) => {
-          const vouchers = t.vouchers as {
-            voucher_date: string;
-            voucher_type: number;
-            voucher_no: string;
-          };
-          const accounts = t.accounts as { account_name: string };
-          const debit = parseFloat(String(t.debit_amount)) || 0;
-          const credit = parseFloat(String(t.credit_amount)) || 0;
+          const details = (t.transaction_details || []) as Array<{
+            debit_amount: unknown;
+            credit_amount: unknown;
+            account_id: string;
+            accounts: { account_name: string } | null;
+          }>;
+
+          const voucherType = t.voucher_types as {
+            code: number;
+            title: string;
+          } | null;
+
+          // Sum up debits and credits from details
+          const totalDebit = details.reduce(
+            (sum, d) => sum + (parseFloat(String(d.debit_amount)) || 0),
+            0
+          );
+          const totalCredit = details.reduce(
+            (sum, d) => sum + (parseFloat(String(d.credit_amount)) || 0),
+            0
+          );
+
+          // Get first account name from details
+          const firstAccount = details[0]?.accounts?.account_name || "Multiple";
 
           return {
             id: t.id as string,
-            date: vouchers.voucher_date,
-            voucherNo: vouchers.voucher_no,
-            voucherType: vouchers.voucher_type,
-            accountName: accounts.account_name,
+            date: t.transaction_date as string,
+            voucherNo: (t.voucher_number as string) || "-",
+            voucherType: voucherType?.code || 0,
+            accountName: firstAccount,
             narration: (t.narration as string) || "",
-            amount: debit > 0 ? debit : credit,
-            isDebit: debit > 0,
+            amount: Math.max(totalDebit, totalCredit),
+            isDebit: totalDebit > totalCredit,
           };
         }
       );

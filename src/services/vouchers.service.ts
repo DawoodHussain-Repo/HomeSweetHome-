@@ -27,16 +27,15 @@ export async function getNextVoucherNumber(
   const pattern = `${prefix}-${yearMonth}-%`;
 
   const { data } = await supabase
-    .from("vouchers")
-    .select("voucher_no")
-    .eq("voucher_type", voucherTypeCode)
-    .like("voucher_no", pattern)
-    .order("voucher_no", { ascending: false })
+    .from("transactions")
+    .select("voucher_number")
+    .like("voucher_number", pattern)
+    .order("voucher_number", { ascending: false })
     .limit(1);
 
   let nextNum = 1;
-  if (data && data.length > 0) {
-    const lastNo = data[0].voucher_no;
+  if (data && data.length > 0 && data[0].voucher_number) {
+    const lastNo = data[0].voucher_number;
     const parts = lastNo.split("-");
     if (parts.length === 3) {
       nextNum = parseInt(parts[2], 10) + 1;
@@ -61,53 +60,68 @@ export async function createVoucher(params: {
     creditAmount: number;
     narration?: string;
   }>;
-}): Promise<Voucher> {
+}): Promise<Transaction> {
   const voucherNo = await getNextVoucherNumber(
     params.voucherType,
     new Date(params.voucherDate)
   );
 
-  // Create voucher
-  const { data: voucher, error: voucherError } = await supabase
-    .from("vouchers")
+  // Get voucher_type_id from voucher_types table
+  const { data: voucherTypeData, error: vtError } = await supabase
+    .from("voucher_types")
+    .select("id")
+    .eq("code", params.voucherType)
+    .single();
+
+  if (vtError || !voucherTypeData) {
+    console.error("Error finding voucher type:", vtError);
+    throw new Error("Voucher type not found");
+  }
+
+  // Create transaction (voucher header)
+  const { data: transaction, error: txError } = await supabase
+    .from("transactions")
     .insert({
-      voucher_no: voucherNo,
-      voucher_date: params.voucherDate,
-      voucher_type: params.voucherType,
+      user_id: params.createdBy,
+      transaction_date: params.voucherDate,
+      voucher_type_id: voucherTypeData.id,
+      voucher_number: voucherNo,
       narration: params.narration || null,
       total_amount: params.totalAmount,
-      status: "posted",
-      created_by: params.createdBy,
+      is_posted: true,
     })
     .select()
     .single();
 
-  if (voucherError) {
-    console.error("Error creating voucher:", voucherError);
-    throw new Error(voucherError.message || "Failed to create voucher");
+  if (txError) {
+    console.error("Error creating transaction:", txError);
+    throw new Error(txError.message || "Failed to create transaction");
   }
 
-  // Create transactions
-  const transactionRows = params.transactions.map((t) => ({
-    voucher_id: voucher.id,
+  // Create transaction details
+  const detailRows = params.transactions.map((t, index) => ({
+    transaction_id: transaction.id,
     account_id: t.accountId,
     debit_amount: t.debitAmount,
     credit_amount: t.creditAmount,
-    narration: t.narration || params.narration || null,
+    description: t.narration || params.narration || null,
+    line_order: index,
   }));
 
-  const { error: txError } = await supabase
-    .from("transactions")
-    .insert(transactionRows);
+  const { error: detailsError } = await supabase
+    .from("transaction_details")
+    .insert(detailRows);
 
-  if (txError) {
-    // Rollback voucher if transactions fail
-    await supabase.from("vouchers").delete().eq("id", voucher.id);
-    console.error("Error creating transactions:", txError);
-    throw new Error(txError.message || "Failed to create transactions");
+  if (detailsError) {
+    // Rollback transaction if details fail
+    await supabase.from("transactions").delete().eq("id", transaction.id);
+    console.error("Error creating transaction details:", detailsError);
+    throw new Error(
+      detailsError.message || "Failed to create transaction details"
+    );
   }
 
-  return voucher;
+  return transaction;
 }
 
 /**
@@ -120,32 +134,28 @@ export async function getVouchers(options?: {
   endDate?: string;
   voucherType?: number;
   search?: string;
-}): Promise<{ vouchers: Voucher[]; total: number }> {
+}): Promise<{ vouchers: Transaction[]; total: number }> {
   const page = options?.page || 1;
   const pageSize = options?.pageSize || 25;
   const offset = (page - 1) * pageSize;
 
   let query = supabase
-    .from("vouchers")
-    .select("*", { count: "exact" })
-    .order("voucher_date", { ascending: false })
+    .from("transactions")
+    .select("*, voucher_types(code, title)", { count: "exact" })
+    .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (options?.startDate) {
-    query = query.gte("voucher_date", options.startDate);
+    query = query.gte("transaction_date", options.startDate);
   }
 
   if (options?.endDate) {
-    query = query.lte("voucher_date", options.endDate);
-  }
-
-  if (options?.voucherType) {
-    query = query.eq("voucher_type", options.voucherType);
+    query = query.lte("transaction_date", options.endDate);
   }
 
   if (options?.search) {
     query = query.or(
-      `voucher_no.ilike.%${options.search}%,narration.ilike.%${options.search}%`
+      `voucher_number.ilike.%${options.search}%,narration.ilike.%${options.search}%`
     );
   }
 
@@ -168,21 +178,21 @@ export async function getVouchers(options?: {
  * Get a single voucher with its transactions
  */
 export async function getVoucherWithTransactions(
-  voucherId: string
+  transactionId: string
 ): Promise<VoucherWithTransactions | null> {
-  const { data: voucher, error: voucherError } = await supabase
-    .from("vouchers")
-    .select("*")
-    .eq("id", voucherId)
+  const { data: transaction, error: txError } = await supabase
+    .from("transactions")
+    .select("*, voucher_types(code, title)")
+    .eq("id", transactionId)
     .single();
 
-  if (voucherError || !voucher) {
-    console.error("Error fetching voucher:", voucherError);
+  if (txError || !transaction) {
+    console.error("Error fetching transaction:", txError);
     return null;
   }
 
-  const { data: transactions, error: txError } = await supabase
-    .from("transactions")
+  const { data: details, error: detailsError } = await supabase
+    .from("transaction_details")
     .select(
       `
       *,
@@ -194,16 +204,17 @@ export async function getVoucherWithTransactions(
       )
     `
     )
-    .eq("voucher_id", voucherId);
+    .eq("transaction_id", transactionId)
+    .order("line_order", { ascending: true });
 
-  if (txError) {
-    console.error("Error fetching transactions:", txError);
+  if (detailsError) {
+    console.error("Error fetching transaction details:", detailsError);
     return null;
   }
 
   return {
-    ...voucher,
-    transactions: transactions || [],
+    ...transaction,
+    transactions: details || [],
   };
 }
 
@@ -216,25 +227,44 @@ export async function getRecentTransactions(limit: number = 10) {
     .select(
       `
       id,
-      debit_amount,
-      credit_amount,
+      transaction_date,
+      voucher_number,
       narration,
-      vouchers!inner (
-        voucher_date,
-        voucher_type,
-        voucher_no
-      ),
-      accounts!inner (
-        account_name
+      total_amount,
+      voucher_type_id,
+      transaction_details (
+        debit_amount,
+        credit_amount,
+        account_id,
+        accounts (
+          account_name
+        )
       )
     `
     )
+    .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) {
     console.error("Error fetching recent transactions:", error);
     return [];
+  }
+
+  // Fetch voucher types separately to avoid join issues
+  if (data && data.length > 0) {
+    const voucherTypeIds = [...new Set(data.map((t) => t.voucher_type_id))];
+    const { data: voucherTypes } = await supabase
+      .from("voucher_types")
+      .select("id, code, title")
+      .in("id", voucherTypeIds);
+
+    const vtMap = new Map(voucherTypes?.map((vt) => [vt.id, vt]) || []);
+
+    return data.map((t) => ({
+      ...t,
+      voucher_types: vtMap.get(t.voucher_type_id) || null,
+    }));
   }
 
   return data || [];

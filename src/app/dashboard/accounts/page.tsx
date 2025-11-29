@@ -118,17 +118,17 @@ export default function AccountsPage() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "asset":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+        return "bg-blue-500/20 text-blue-400 border border-blue-500/30";
       case "liability":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300";
+        return "bg-red-500/20 text-red-400 border border-red-500/30";
       case "equity":
-        return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+        return "bg-purple-500/20 text-purple-400 border border-purple-500/30";
       case "income":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+        return "bg-green-500/20 text-green-400 border border-green-500/30";
       case "expense":
-        return "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300";
+        return "bg-orange-500/20 text-orange-400 border border-orange-500/30";
       default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300";
+        return "bg-white/10 text-muted-foreground border border-white/20";
     }
   };
 
@@ -139,15 +139,15 @@ export default function AccountsPage() {
     return (
       <div key={account.id}>
         <div
-          className={`flex items-center gap-2 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 ${
-            account.is_header ? "bg-gray-50 dark:bg-gray-800" : ""
+          className={`flex items-center gap-2 px-4 py-3 hover:bg-white/5 border-b border-white/5 transition-colors ${
+            account.is_header ? "glass" : ""
           }`}
           style={{ paddingLeft: `${level * 24 + 16}px` }}
         >
           {/* Expand/Collapse Button */}
           <button
             onClick={() => toggleExpand(account.id)}
-            className={`w-6 h-6 flex items-center justify-center rounded hover:bg-gray-200 dark:hover:bg-gray-600 ${
+            className={`w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 text-muted-foreground ${
               !hasChildren ? "invisible" : ""
             }`}
           >
@@ -160,13 +160,13 @@ export default function AccountsPage() {
 
           {/* Icon */}
           {account.is_header ? (
-            <FolderOpen size={18} className="text-amber-500" />
+            <FolderOpen size={18} className="text-amber-400" />
           ) : (
-            <FileText size={18} className="text-gray-400" />
+            <FileText size={18} className="text-muted-foreground" />
           )}
 
           {/* Account Code */}
-          <span className="font-mono text-sm text-gray-500 dark:text-gray-400 w-28">
+          <span className="font-mono text-sm text-muted-foreground w-28">
             {account.account_code}
           </span>
 
@@ -175,7 +175,7 @@ export default function AccountsPage() {
             <span
               className={`${
                 account.is_header ? "font-semibold" : ""
-              } text-gray-900 dark:text-white`}
+              } text-foreground`}
             >
               {language === "ur" && account.account_name_urdu
                 ? account.account_name_urdu
@@ -193,7 +193,7 @@ export default function AccountsPage() {
           </span>
 
           {/* Balance */}
-          <span className="w-32 text-right font-medium text-gray-900 dark:text-white">
+          <span className="w-32 text-right font-medium text-foreground tabular-nums">
             {account.opening_balance
               ? `Rs. ${account.opening_balance.toLocaleString()}`
               : "-"}
@@ -203,13 +203,13 @@ export default function AccountsPage() {
           <div className="flex items-center gap-1 ml-4">
             <Link
               href={`/dashboard/accounts/${account.id}/edit`}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
             >
               <Edit2 size={16} />
             </Link>
             <button
               onClick={() => handleDelete(account.id)}
-              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
             >
               <Trash2 size={16} />
             </button>
@@ -231,16 +231,16 @@ export default function AccountsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold text-foreground">
             {t("accounts.title")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-muted-foreground mt-1">
             Manage your chart of accounts
           </p>
         </div>
         <Link
           href="/dashboard/accounts/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
         >
           <Plus size={20} />
           {t("accounts.addNew")}
@@ -248,12 +248,12 @@ export default function AccountsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+      <div className="glass-card rounded-xl p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="relative flex-1">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               size={20}
             />
             <input
@@ -261,7 +261,7 @@ export default function AccountsPage() {
               placeholder={`${t("common.search")}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full pl-10 pr-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
@@ -269,7 +269,7 @@ export default function AccountsPage() {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+            className="px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground"
           >
             <option value="all">All Types</option>
             <option value="asset">{t("accounts.asset")}</option>
@@ -283,13 +283,13 @@ export default function AccountsPage() {
           <div className="flex gap-2">
             <button
               onClick={expandAll}
-              className="px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-3 py-2 text-muted-foreground hover:text-foreground glass rounded-lg transition-colors"
             >
               Expand All
             </button>
             <button
               onClick={collapseAll}
-              className="px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="px-3 py-2 text-muted-foreground hover:text-foreground glass rounded-lg transition-colors"
             >
               Collapse All
             </button>
@@ -298,9 +298,9 @@ export default function AccountsPage() {
       </div>
 
       {/* Accounts Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="glass-card rounded-xl overflow-hidden">
         {/* Table Header */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 font-medium text-gray-600 dark:text-gray-300 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 glass border-b border-white/10 font-medium text-muted-foreground text-sm">
           <div className="w-6" /> {/* Expand button space */}
           <div className="w-5" /> {/* Icon space */}
           <div className="w-28">{t("accounts.code")}</div>
@@ -329,10 +329,7 @@ export default function AccountsPage() {
         {["asset", "liability", "equity", "income", "expense"].map((type) => {
           const count = accounts.filter((a) => a.account_type === type).length;
           return (
-            <div
-              key={type}
-              className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700"
-            >
+            <div key={type} className="glass-card rounded-lg p-4">
               <span
                 className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(
                   type
@@ -340,9 +337,7 @@ export default function AccountsPage() {
               >
                 {t(`accounts.${type}`)}
               </span>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {count}
-              </p>
+              <p className="text-2xl font-bold text-foreground">{count}</p>
             </div>
           );
         })}
