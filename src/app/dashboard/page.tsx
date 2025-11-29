@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { useDashboard } from "@/hooks";
 import { useLanguage } from "@/context/LanguageContext";
-import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
+import { format } from "date-fns";
 import {
   BookOpen,
   FileText,
@@ -18,6 +18,7 @@ import {
   BarChart3,
   PieChart,
   Activity,
+  RefreshCw,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,283 +31,98 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface DashboardStats {
-  totalAccounts: number;
-  totalTransactions: number;
-  thisMonthTransactions: number;
-  totalDebit: number;
-  totalCredit: number;
-  cashBalance: number;
-  monthlyIncome: number;
-  monthlyExpense: number;
-}
+// Voucher type mapping
+const VOUCHER_TYPE_MAP: Record<
+  number,
+  { name: string; isReceipt: boolean; isPayment: boolean }
+> = {
+  101: { name: "Cash Receipt", isReceipt: true, isPayment: false },
+  102: { name: "Cash Payment", isReceipt: false, isPayment: true },
+  201: { name: "Journal Entry", isReceipt: false, isPayment: false },
+  301: { name: "Opening Balance", isReceipt: false, isPayment: false },
+};
 
-interface RecentTransaction {
-  id: string;
-  date: string;
-  voucherType: string;
-  narration: string;
-  amount: number;
-  isDebit: boolean;
-  legacyNo: number | null;
-}
+// Loading skeleton component
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Header Skeleton */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64 mt-2" />
+        </div>
+        <Skeleton className="h-10 w-32" />
+      </div>
 
-interface MonthlyData {
-  month: string;
-  income: number;
-  expense: number;
+      {/* Stats Cards Skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+                <Skeleton className="h-12 w-12 rounded-full" />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Chart and Quick Actions Skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <Skeleton className="h-6 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Transactions Skeleton */}
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalAccounts: 0,
-    totalTransactions: 0,
-    thisMonthTransactions: 0,
-    totalDebit: 0,
-    totalCredit: 0,
-    cashBalance: 0,
-    monthlyIncome: 0,
-    monthlyExpense: 0,
-  });
-  const [recentTransactions, setRecentTransactions] = useState<
-    RecentTransaction[]
-  >([]);
-  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { stats, monthlyData, recentTransactions, isLoading, error, refetch } =
+    useDashboard();
   const { t } = useLanguage();
-  const supabase = createClient();
 
-  useEffect(() => {
-    fetchDashboardData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    const today = new Date();
-    const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
-    const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
-
-    try {
-      // Get total accounts count
-      const { count: accountCount } = await supabase
-        .from("accounts")
-        .select("*", { count: "exact", head: true })
-        .eq("is_header", false);
-
-      // Get total transactions count
-      const { count: txnCount } = await supabase
-        .from("transactions")
-        .select("*", { count: "exact", head: true });
-
-      // Get this month's transactions count
-      const { count: monthTxnCount } = await supabase
-        .from("transactions")
-        .select("*", { count: "exact", head: true })
-        .gte("transaction_date", monthStart)
-        .lte("transaction_date", monthEnd);
-
-      // Get total debits and credits
-      const { data: totals } = await supabase.from("transaction_details")
-        .select(`
-          debit_amount,
-          credit_amount
-        `);
-
-      let totalDebit = 0;
-      let totalCredit = 0;
-      if (totals) {
-        totals.forEach((t) => {
-          totalDebit += parseFloat(String(t.debit_amount)) || 0;
-          totalCredit += parseFloat(String(t.credit_amount)) || 0;
-        });
-      }
-
-      // Get cash account balance (look for "Cash" or code starting with "1")
-      const { data: cashAccounts } = await supabase
-        .from("accounts")
-        .select("id")
-        .or("account_name.ilike.%cash%,account_code.like.1%")
-        .eq("is_header", false)
-        .limit(5);
-
-      let cashBalance = 0;
-      if (cashAccounts && cashAccounts.length > 0) {
-        const cashIds = cashAccounts.map((c) => c.id);
-        const { data: cashTotals } = await supabase
-          .from("transaction_details")
-          .select("debit_amount, credit_amount")
-          .in("account_id", cashIds);
-
-        if (cashTotals) {
-          cashTotals.forEach((t) => {
-            cashBalance +=
-              (parseFloat(String(t.debit_amount)) || 0) -
-              (parseFloat(String(t.credit_amount)) || 0);
-          });
-        }
-      }
-
-      // Get this month income/expense
-      const { data: monthDetails } = await supabase
-        .from("transaction_details")
-        .select(
-          `
-          debit_amount,
-          credit_amount,
-          accounts!inner(account_type),
-          transactions!inner(transaction_date)
-        `
-        )
-        .gte("transactions.transaction_date", monthStart)
-        .lte("transactions.transaction_date", monthEnd);
-
-      let monthlyIncome = 0;
-      let monthlyExpense = 0;
-      if (monthDetails) {
-        monthDetails.forEach((d: Record<string, unknown>) => {
-          const accounts = d.accounts as
-            | { account_type: string }
-            | { account_type: string }[];
-          const acctType = Array.isArray(accounts)
-            ? accounts[0]?.account_type
-            : accounts?.account_type;
-          if (acctType === "income") {
-            monthlyIncome += parseFloat(String(d.credit_amount)) || 0;
-          } else if (acctType === "expense") {
-            monthlyExpense += parseFloat(String(d.debit_amount)) || 0;
-          }
-        });
-      }
-
-      setStats({
-        totalAccounts: accountCount || 0,
-        totalTransactions: txnCount || 0,
-        thisMonthTransactions: monthTxnCount || 0,
-        totalDebit,
-        totalCredit,
-        cashBalance,
-        monthlyIncome,
-        monthlyExpense,
-      });
-
-      // Get recent transactions
-      const { data: recentTxns } = await supabase
-        .from("transactions")
-        .select(
-          `
-          id,
-          transaction_date,
-          voucher_type_code,
-          narration,
-          legacy_tr_no,
-          transaction_details(debit_amount, credit_amount)
-        `
-        )
-        .order("transaction_date", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (recentTxns) {
-        const recent: RecentTransaction[] = recentTxns.map(
-          (tx: Record<string, unknown>) => {
-            const details = (tx.transaction_details || []) as Array<{
-              debit_amount: unknown;
-              credit_amount: unknown;
-            }>;
-            const txTotalDebit = details.reduce(
-              (sum: number, d) =>
-                sum + (parseFloat(String(d.debit_amount)) || 0),
-              0
-            );
-            const txTotalCredit = details.reduce(
-              (sum: number, d) =>
-                sum + (parseFloat(String(d.credit_amount)) || 0),
-              0
-            );
-            return {
-              id: tx.id as string,
-              date: tx.transaction_date as string,
-              voucherType: getVoucherTypeName(tx.voucher_type_code as number),
-              narration: (tx.narration as string) || "-",
-              amount: Math.max(txTotalDebit, txTotalCredit),
-              isDebit: txTotalDebit > txTotalCredit,
-              legacyNo: tx.legacy_tr_no as number | null,
-            };
-          }
-        );
-        setRecentTransactions(recent);
-      }
-
-      // Get monthly data for chart (last 6 months)
-      const monthlyStats: MonthlyData[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const monthDate = subMonths(today, i);
-        const mStart = format(startOfMonth(monthDate), "yyyy-MM-dd");
-        const mEnd = format(endOfMonth(monthDate), "yyyy-MM-dd");
-
-        const { data: mDetails } = await supabase
-          .from("transaction_details")
-          .select(
-            `
-            debit_amount,
-            credit_amount,
-            accounts!inner(account_type),
-            transactions!inner(transaction_date)
-          `
-          )
-          .gte("transactions.transaction_date", mStart)
-          .lte("transactions.transaction_date", mEnd);
-
-        let income = 0;
-        let expense = 0;
-        if (mDetails) {
-          mDetails.forEach((d: Record<string, unknown>) => {
-            const accounts = d.accounts as
-              | { account_type: string }
-              | { account_type: string }[];
-            const acctType = Array.isArray(accounts)
-              ? accounts[0]?.account_type
-              : accounts?.account_type;
-            if (acctType === "income") {
-              income += parseFloat(String(d.credit_amount)) || 0;
-            } else if (acctType === "expense") {
-              expense += parseFloat(String(d.debit_amount)) || 0;
-            }
-          });
-        }
-
-        monthlyStats.push({
-          month: format(monthDate, "MMM"),
-          income,
-          expense,
-        });
-      }
-      setMonthlyData(monthlyStats);
-    } catch (error) {
-      console.error("Dashboard fetch error:", error);
-    }
-
-    setLoading(false);
+  const getVoucherTypeName = (code: number): string => {
+    return VOUCHER_TYPE_MAP[code]?.name || `Voucher ${code}`;
   };
 
-  const getVoucherTypeName = (code: number) => {
-    switch (code) {
-      case 101:
-        return "Cash Receipt";
-      case 102:
-        return "Cash Payment";
-      case 201:
-        return "Journal";
-      case 301:
-        return "Opening";
-      default:
-        return `Voucher ${code}`;
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number): string => {
     return `Rs. ${Math.abs(amount).toLocaleString("en-PK", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
@@ -321,13 +137,23 @@ export default function DashboardPage() {
     );
   }, [monthlyData]);
 
-  if (loading) {
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-destructive font-medium mb-2">
+            Error loading dashboard
+          </p>
+          <p className="text-muted-foreground text-sm">{error}</p>
         </div>
+        <Button onClick={refetch} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -600,52 +426,59 @@ export default function DashboardPage() {
                     <TableHead className="w-24">Date</TableHead>
                     <TableHead className="w-20">V.No</TableHead>
                     <TableHead className="w-32">Type</TableHead>
+                    <TableHead>Account</TableHead>
                     <TableHead>Narration</TableHead>
                     <TableHead className="text-right w-32">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentTransactions.map((tx) => (
-                    <TableRow key={tx.id}>
-                      <TableCell className="font-mono text-sm">
-                        {format(new Date(tx.date), "dd/MM/yy")}
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {tx.legacyNo || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            tx.voucherType.includes("Receipt")
-                              ? "border-green-500 text-green-600"
-                              : tx.voucherType.includes("Payment")
-                              ? "border-red-500 text-red-600"
-                              : ""
-                          }
-                        >
-                          {tx.voucherType}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {tx.narration}
-                      </TableCell>
-                      <TableCell className="text-right font-mono">
-                        <span
-                          className={`flex items-center justify-end gap-1 ${
-                            tx.isDebit ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {tx.isDebit ? (
-                            <ArrowUpRight className="h-3 w-3" />
-                          ) : (
-                            <ArrowDownRight className="h-3 w-3" />
-                          )}
-                          {formatCurrency(tx.amount)}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {recentTransactions.map((tx) => {
+                    const typeName = getVoucherTypeName(tx.voucherType);
+                    return (
+                      <TableRow key={tx.id}>
+                        <TableCell className="font-mono text-sm">
+                          {format(new Date(tx.date), "dd/MM/yy")}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {tx.voucherNo || "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              typeName.includes("Receipt")
+                                ? "border-green-500 text-green-600"
+                                : typeName.includes("Payment")
+                                ? "border-red-500 text-red-600"
+                                : ""
+                            }
+                          >
+                            {typeName}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="max-w-[120px] truncate">
+                          {tx.accountName}
+                        </TableCell>
+                        <TableCell className="max-w-xs truncate">
+                          {tx.narration}
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          <span
+                            className={`flex items-center justify-end gap-1 ${
+                              tx.isDebit ? "text-green-600" : "text-red-600"
+                            }`}
+                          >
+                            {tx.isDebit ? (
+                              <ArrowUpRight className="h-3 w-3" />
+                            ) : (
+                              <ArrowDownRight className="h-3 w-3" />
+                            )}
+                            {formatCurrency(tx.amount)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

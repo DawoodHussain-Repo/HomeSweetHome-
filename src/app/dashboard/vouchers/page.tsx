@@ -1,27 +1,29 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useLanguage } from "@/context/LanguageContext";
 import { format } from "date-fns";
 import {
   Plus,
   Save,
   X,
-  TrendingUp,
-  TrendingDown,
+  Receipt,
+  CreditCard,
   FileText,
-  RefreshCw,
-  Trash2,
-  ChevronDown,
+  BookOpen,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { SearchableAccountSelect } from "@/components/shared/SearchableAccountSelect";
 import {
   Table,
   TableBody,
@@ -30,435 +32,505 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface Account {
   id: string;
   account_code: string;
   account_name: string;
-  account_name_urdu?: string;
   account_type: string;
 }
 
-interface VoucherType {
-  id: string;
-  code: number;
-  title: string;
-  title_urdu?: string;
-  prefix: string;
-}
-
-interface VoucherLine {
+interface JournalLine {
   id: string;
   accountId: string;
   accountName: string;
   debit: number;
   credit: number;
-  description: string;
 }
 
-export default function VouchersPage() {
-  const searchParams = useSearchParams();
-  const initialType = searchParams.get("type");
+type VoucherType = "receipt" | "payment" | "journal" | "opening";
 
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [, setVoucherTypes] = useState<VoucherType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+const VOUCHER_TYPE_CODES: Record<VoucherType, number> = {
+  receipt: 101,
+  payment: 102,
+  journal: 201,
+  opening: 301,
+};
+
+export default function VouchersPage() {
+  const supabase = createClient();
+
+  // Auth state
+  const [userId, setUserId] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   // Form state
-  const [selectedVoucherType, setSelectedVoucherType] = useState<string>(
-    initialType || "101"
-  );
+  const [voucherType, setVoucherType] = useState<VoucherType>("receipt");
   const [voucherDate, setVoucherDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
   const [narration, setNarration] = useState("");
-  const [lines, setLines] = useState<VoucherLine[]>([
-    {
-      id: "1",
-      accountId: "",
-      accountName: "",
-      debit: 0,
-      credit: 0,
-      description: "",
-    },
-    {
-      id: "2",
-      accountId: "",
-      accountName: "",
-      debit: 0,
-      credit: 0,
-      description: "",
-    },
+
+  // Cash voucher state (receipt/payment)
+  const [selectedAccountId, setSelectedAccountId] = useState("");
+  const [selectedAccountName, setSelectedAccountName] = useState("");
+  const [amount, setAmount] = useState("");
+
+  // Journal voucher state
+  const [journalLines, setJournalLines] = useState<JournalLine[]>([
+    { id: "1", accountId: "", accountName: "", debit: 0, credit: 0 },
+    { id: "2", accountId: "", accountName: "", debit: 0, credit: 0 },
   ]);
 
-  // Tips section
-  const [showTips, setShowTips] = useState(true);
+  // Cash account
+  const [cashAccount, setCashAccount] = useState<Account | null>(null);
 
-  useLanguage();
-  const supabase = createClient();
+  // UI state
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [lastVoucherNo, setLastVoucherNo] = useState<string | null>(null);
 
+  // Check auth from localStorage on mount - check both storage keys
   useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Try new auth key first
+    const authData = localStorage.getItem("hisaab_auth");
+    if (authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        if (parsed.userId) {
+          setUserId(parsed.userId);
+          setAuthChecked(true);
+          return;
+        }
+      } catch {
+        console.error("Failed to parse hisaab_auth");
+      }
+    }
+
+    // Fallback to old user key
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const parsed = JSON.parse(userData);
+        if (parsed.id) {
+          setUserId(parsed.id);
+          // Migrate to new format
+          localStorage.setItem(
+            "hisaab_auth",
+            JSON.stringify({
+              userId: parsed.id,
+              email: parsed.email,
+              name: parsed.name,
+            })
+          );
+        }
+      } catch {
+        console.error("Failed to parse user data");
+      }
+    }
+
+    setAuthChecked(true);
   }, []);
 
+  // Fetch cash account
   useEffect(() => {
-    if (initialType) {
-      setSelectedVoucherType(initialType);
-    }
-  }, [initialType]);
-
-  const fetchData = async () => {
-    setLoading(true);
-
-    const [accountsRes, typesRes] = await Promise.all([
-      supabase
+    const fetchCashAccount = async () => {
+      const { data } = await supabase
         .from("accounts")
-        .select("*")
+        .select("id, account_code, account_name, account_type")
+        .or("account_name.ilike.%cash%,account_code.eq.100")
         .eq("is_header", false)
-        .order("account_code"),
-      supabase.from("voucher_types").select("*").order("code"),
-    ]);
+        .limit(1)
+        .single();
 
-    setAccounts(accountsRes.data || []);
-    setVoucherTypes(typesRes.data || []);
-    setLoading(false);
+      if (data) {
+        setCashAccount(data);
+      }
+    };
+    fetchCashAccount();
+  }, [supabase]);
+
+  // Get next voucher number
+  const getNextVoucherNo = useCallback(async () => {
+    const typeCode = VOUCHER_TYPE_CODES[voucherType];
+    const prefix = voucherType.charAt(0).toUpperCase();
+    const yearMonth = format(new Date(voucherDate), "yyyyMM");
+
+    const { data } = await supabase
+      .from("vouchers")
+      .select("voucher_no")
+      .eq("voucher_type", typeCode)
+      .like("voucher_no", `${prefix}-${yearMonth}-%`)
+      .order("voucher_no", { ascending: false })
+      .limit(1);
+
+    let nextNum = 1;
+    if (data && data.length > 0) {
+      const lastNo = data[0].voucher_no;
+      const parts = lastNo.split("-");
+      if (parts.length === 3) {
+        nextNum = parseInt(parts[2], 10) + 1;
+      }
+    }
+
+    return `${prefix}-${yearMonth}-${nextNum.toString().padStart(4, "0")}`;
+  }, [supabase, voucherType, voucherDate]);
+
+  // Reset form
+  const resetForm = () => {
+    setNarration("");
+    setSelectedAccountId("");
+    setSelectedAccountName("");
+    setAmount("");
+    setJournalLines([
+      { id: "1", accountId: "", accountName: "", debit: 0, credit: 0 },
+      { id: "2", accountId: "", accountName: "", debit: 0, credit: 0 },
+    ]);
+    setMessage(null);
+    setLastVoucherNo(null);
   };
 
-  const getVoucherTypeInfo = useCallback(() => {
-    const code = parseInt(selectedVoucherType);
-    switch (code) {
-      case 101:
-        return {
-          title: "Cash Receipt",
-          titleUrdu: "نقد وصولی",
-          icon: TrendingUp,
-          color: "text-green-600",
-          bgColor: "bg-green-100 dark:bg-green-900/30",
-          description:
-            "Record money received in cash. Debit Cash, Credit the source account.",
-        };
-      case 102:
-        return {
-          title: "Cash Payment",
-          titleUrdu: "نقد ادائیگی",
-          icon: TrendingDown,
-          color: "text-red-600",
-          bgColor: "bg-red-100 dark:bg-red-900/30",
-          description:
-            "Record cash paid out. Credit Cash, Debit the expense/payee account.",
-        };
-      case 201:
-        return {
-          title: "Journal Entry",
-          titleUrdu: "جنرل اندراج",
-          icon: FileText,
-          color: "text-blue-600",
-          bgColor: "bg-blue-100 dark:bg-blue-900/30",
-          description:
-            "General purpose entry for transfers and adjustments. Debits must equal credits.",
-        };
-      case 301:
-        return {
-          title: "Opening Balance",
-          titleUrdu: "ابتدائی بیلنس",
-          icon: RefreshCw,
-          color: "text-purple-600",
-          bgColor: "bg-purple-100 dark:bg-purple-900/30",
-          description:
-            "Record opening balances for accounts at the start of a period.",
-        };
-      default:
-        return {
-          title: `Voucher ${code}`,
-          titleUrdu: "",
-          icon: FileText,
-          color: "text-gray-600",
-          bgColor: "bg-gray-100 dark:bg-gray-900/30",
-          description: "Custom voucher entry.",
-        };
-    }
-  }, [selectedVoucherType]);
+  // Handle voucher type change
+  const handleVoucherTypeChange = (type: VoucherType) => {
+    setVoucherType(type);
+    resetForm();
+  };
 
-  const addLine = () => {
-    setLines([
-      ...lines,
+  // Add journal line
+  const addJournalLine = () => {
+    setJournalLines([
+      ...journalLines,
       {
         id: Date.now().toString(),
         accountId: "",
         accountName: "",
         debit: 0,
         credit: 0,
-        description: "",
       },
     ]);
   };
 
-  const removeLine = (id: string) => {
-    if (lines.length > 2) {
-      setLines(lines.filter((l) => l.id !== id));
+  // Remove journal line
+  const removeJournalLine = (id: string) => {
+    if (journalLines.length > 2) {
+      setJournalLines(journalLines.filter((line) => line.id !== id));
     }
   };
 
-  const updateLine = (
+  // Update journal line
+  const updateJournalLine = (
     id: string,
-    field: keyof VoucherLine,
+    field: keyof JournalLine,
     value: string | number
   ) => {
-    setLines(
-      lines.map((l) => {
-        if (l.id === id) {
-          const updated = { ...l, [field]: value };
-          // If account changes, update account name
-          if (field === "accountId") {
-            const account = accounts.find((a) => a.id === value);
-            updated.accountName = account?.account_name || "";
-          }
-          return updated;
-        }
-        return l;
-      })
+    setJournalLines(
+      journalLines.map((line) =>
+        line.id === id ? { ...line, [field]: value } : line
+      )
     );
   };
 
-  const totalDebit = lines.reduce((sum, l) => sum + (l.debit || 0), 0);
-  const totalCredit = lines.reduce((sum, l) => sum + (l.credit || 0), 0);
-  const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
+  // Calculate totals for journal
+  const journalTotals = journalLines.reduce(
+    (acc, line) => ({
+      debit: acc.debit + (line.debit || 0),
+      credit: acc.credit + (line.credit || 0),
+    }),
+    { debit: 0, credit: 0 }
+  );
 
-  const resetForm = () => {
-    setNarration("");
-    setLines([
-      {
-        id: "1",
-        accountId: "",
-        accountName: "",
-        debit: 0,
-        credit: 0,
-        description: "",
-      },
-      {
-        id: "2",
-        accountId: "",
-        accountName: "",
-        debit: 0,
-        credit: 0,
-        description: "",
-      },
-    ]);
-  };
+  const isJournalBalanced =
+    Math.abs(journalTotals.debit - journalTotals.credit) < 0.01;
 
+  // Save voucher
   const saveVoucher = async () => {
-    if (!isBalanced) {
-      alert("Debit and Credit must be equal!");
+    if (!userId) {
+      setMessage({ type: "error", text: "Please login to save vouchers" });
       return;
     }
 
-    const validLines = lines.filter(
-      (l) => l.accountId && (l.debit || l.credit)
-    );
-    if (validLines.length < 2) {
-      alert("Please add at least 2 account lines with amounts");
+    if (
+      !cashAccount &&
+      (voucherType === "receipt" || voucherType === "payment")
+    ) {
+      setMessage({
+        type: "error",
+        text: "Cash account not found. Please set up a Cash account.",
+      });
       return;
+    }
+
+    // Validation
+    if (voucherType === "receipt" || voucherType === "payment") {
+      if (!selectedAccountId) {
+        setMessage({ type: "error", text: "Please select an account" });
+        return;
+      }
+      const numAmount = parseFloat(amount);
+      if (!numAmount || numAmount <= 0) {
+        setMessage({ type: "error", text: "Please enter a valid amount" });
+        return;
+      }
+    } else if (voucherType === "journal") {
+      const validLines = journalLines.filter(
+        (l) => l.accountId && (l.debit > 0 || l.credit > 0)
+      );
+      if (validLines.length < 2) {
+        setMessage({
+          type: "error",
+          text: "Journal entry needs at least 2 lines",
+        });
+        return;
+      }
+      if (!isJournalBalanced) {
+        setMessage({ type: "error", text: "Debit and Credit must be equal" });
+        return;
+      }
     }
 
     setSaving(true);
+    setMessage(null);
 
     try {
-      // Get user ID from localStorage
-      const authData = localStorage.getItem("hisaab_auth");
-      const userId = authData ? JSON.parse(authData).userId : null;
+      const voucherNo = await getNextVoucherNo();
+      const typeCode = VOUCHER_TYPE_CODES[voucherType];
+      const numAmount = parseFloat(amount) || 0;
 
-      if (!userId) {
-        alert("Please login again");
-        setSaving(false);
-        return;
-      }
-
-      // Create transaction
-      const { data: transaction, error: txError } = await supabase
-        .from("transactions")
+      // Create voucher
+      const { data: voucher, error: voucherError } = await supabase
+        .from("vouchers")
         .insert({
-          user_id: userId,
-          voucher_type_code: parseInt(selectedVoucherType),
-          transaction_date: voucherDate,
-          narration: narration,
-          total_amount: totalDebit,
-          is_posted: false,
+          voucher_no: voucherNo,
+          voucher_date: voucherDate,
+          voucher_type: typeCode,
+          narration: narration || null,
+          total_amount:
+            voucherType === "journal" ? journalTotals.debit : numAmount,
+          status: "posted",
+          created_by: userId,
         })
         .select()
         .single();
 
+      if (voucherError) throw voucherError;
+
+      // Create transactions
+      const transactions: {
+        voucher_id: string;
+        account_id: string;
+        debit_amount: number;
+        credit_amount: number;
+        narration: string | null;
+      }[] = [];
+
+      if (voucherType === "receipt") {
+        // Cash Receipt: Debit Cash, Credit selected account
+        transactions.push({
+          voucher_id: voucher.id,
+          account_id: cashAccount!.id,
+          debit_amount: numAmount,
+          credit_amount: 0,
+          narration: narration || null,
+        });
+        transactions.push({
+          voucher_id: voucher.id,
+          account_id: selectedAccountId,
+          debit_amount: 0,
+          credit_amount: numAmount,
+          narration: narration || null,
+        });
+      } else if (voucherType === "payment") {
+        // Cash Payment: Credit Cash, Debit selected account
+        transactions.push({
+          voucher_id: voucher.id,
+          account_id: selectedAccountId,
+          debit_amount: numAmount,
+          credit_amount: 0,
+          narration: narration || null,
+        });
+        transactions.push({
+          voucher_id: voucher.id,
+          account_id: cashAccount!.id,
+          debit_amount: 0,
+          credit_amount: numAmount,
+          narration: narration || null,
+        });
+      } else if (voucherType === "journal") {
+        // Journal: Multiple lines as entered
+        for (const line of journalLines) {
+          if (line.accountId && (line.debit > 0 || line.credit > 0)) {
+            transactions.push({
+              voucher_id: voucher.id,
+              account_id: line.accountId,
+              debit_amount: line.debit || 0,
+              credit_amount: line.credit || 0,
+              narration: narration || null,
+            });
+          }
+        }
+      } else if (voucherType === "opening") {
+        // Opening: Single entry based on amount sign
+        if (numAmount > 0) {
+          transactions.push({
+            voucher_id: voucher.id,
+            account_id: selectedAccountId,
+            debit_amount: numAmount,
+            credit_amount: 0,
+            narration: narration || "Opening Balance",
+          });
+        } else {
+          transactions.push({
+            voucher_id: voucher.id,
+            account_id: selectedAccountId,
+            debit_amount: 0,
+            credit_amount: Math.abs(numAmount),
+            narration: narration || "Opening Balance",
+          });
+        }
+      }
+
+      const { error: txError } = await supabase
+        .from("transactions")
+        .insert(transactions);
       if (txError) throw txError;
 
-      // Create transaction details
-      const details = validLines.map((line) => ({
-        transaction_id: transaction.id,
-        account_id: line.accountId,
-        debit_amount: line.debit || 0,
-        credit_amount: line.credit || 0,
-        description: line.description || null,
-      }));
-
-      const { error: detailsError } = await supabase
-        .from("transaction_details")
-        .insert(details);
-
-      if (detailsError) throw detailsError;
-
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      setMessage({
+        type: "success",
+        text: `Voucher ${voucherNo} saved successfully!`,
+      });
+      setLastVoucherNo(voucherNo);
       resetForm();
     } catch (error) {
       console.error("Save error:", error);
-      alert("Error saving voucher. Please try again.");
+      setMessage({
+        type: "error",
+        text: "Failed to save voucher. Please try again.",
+      });
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
   };
 
-  const voucherInfo = getVoucherTypeInfo();
-  const VoucherIcon = voucherInfo.icon;
-
-  if (loading) {
+  // Show loading while checking auth
+  if (!authChecked) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!userId) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Authentication Required</AlertTitle>
+          <AlertDescription>
+            Please{" "}
+            <a href="/login" className="underline font-medium">
+              login
+            </a>{" "}
+            to create vouchers.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Success Banner */}
-      {showSuccess && (
-        <div className="bg-green-100 dark:bg-green-900/30 border border-green-500 text-green-700 dark:text-green-300 px-4 py-3 rounded-lg flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          <span>Voucher saved successfully!</span>
-        </div>
-      )}
-
+    <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Voucher Entry</h1>
-          <p className="text-muted-foreground mt-1">
-            Create new transaction vouchers
+          <h1 className="text-3xl font-bold tracking-tight">Voucher Entry</h1>
+          <p className="text-muted-foreground">
+            Create cash receipts, payments, and journal entries
           </p>
         </div>
+        {lastVoucherNo && (
+          <Badge variant="outline" className="text-sm py-1 px-3">
+            Last: {lastVoucherNo}
+          </Badge>
+        )}
       </div>
 
-      {/* Voucher Type Selection */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          {
-            code: "101",
-            title: "Cash Receipt",
-            urdu: "نقد وصولی",
-            icon: TrendingUp,
-            color: "green",
-          },
-          {
-            code: "102",
-            title: "Cash Payment",
-            urdu: "نقد ادائیگی",
-            icon: TrendingDown,
-            color: "red",
-          },
-          {
-            code: "201",
-            title: "Journal",
-            urdu: "جنرل",
-            icon: FileText,
-            color: "blue",
-          },
-          {
-            code: "301",
-            title: "Opening",
-            urdu: "ابتدائی",
-            icon: RefreshCw,
-            color: "purple",
-          },
-        ].map((vt) => (
-          <button
-            key={vt.code}
-            onClick={() => setSelectedVoucherType(vt.code)}
-            className={`p-4 rounded-lg border-2 transition-all ${
-              selectedVoucherType === vt.code
-                ? `border-${vt.color}-500 bg-${vt.color}-50 dark:bg-${vt.color}-900/20`
-                : "border-border hover:border-muted-foreground/50"
-            }`}
-          >
-            <vt.icon
-              className={`h-8 w-8 mx-auto mb-2 ${
-                selectedVoucherType === vt.code
-                  ? `text-${vt.color}-600`
-                  : "text-muted-foreground"
-              }`}
-            />
-            <p className="font-medium text-sm">{vt.title}</p>
-            <p className="text-xs text-muted-foreground" dir="rtl">
-              {vt.urdu}
-            </p>
-          </button>
-        ))}
-      </div>
+      {/* Message Alert */}
+      {message && (
+        <Alert
+          variant={message.type === "error" ? "destructive" : "default"}
+          className={
+            message.type === "success"
+              ? "border-green-500 bg-green-50 dark:bg-green-950"
+              : ""
+          }
+        >
+          {message.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          <AlertTitle>
+            {message.type === "success" ? "Success" : "Error"}
+          </AlertTitle>
+          <AlertDescription>{message.text}</AlertDescription>
+        </Alert>
+      )}
 
-      {/* Entry Form */}
+      {/* Main Form Card */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-lg ${voucherInfo.bgColor}`}>
-                <VoucherIcon className={`h-6 w-6 ${voucherInfo.color}`} />
-              </div>
-              <div>
-                <CardTitle>{voucherInfo.title}</CardTitle>
-                {voucherInfo.titleUrdu && (
-                  <p className="text-sm text-muted-foreground" dir="rtl">
-                    {voucherInfo.titleUrdu}
-                  </p>
-                )}
-              </div>
-            </div>
-            <Badge variant="outline" className="text-lg px-4 py-1">
-              New
-            </Badge>
-          </div>
+        <CardHeader className="pb-4">
+          <Tabs
+            value={voucherType}
+            onValueChange={(v) => handleVoucherTypeChange(v as VoucherType)}
+          >
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="receipt" className="flex items-center gap-2">
+                <Receipt className="h-4 w-4" />
+                <span className="hidden sm:inline">Cash Receipt</span>
+                <span className="sm:hidden">Receipt</span>
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span className="hidden sm:inline">Cash Payment</span>
+                <span className="sm:hidden">Payment</span>
+              </TabsTrigger>
+              <TabsTrigger value="journal" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Journal Entry</span>
+                <span className="sm:hidden">Journal</span>
+              </TabsTrigger>
+              <TabsTrigger value="opening" className="flex items-center gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span className="hidden sm:inline">Opening Balance</span>
+                <span className="sm:hidden">Opening</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </CardHeader>
+
         <CardContent className="space-y-6">
-          {/* Date and Narration */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="date">Date</Label>
+          {/* Common Fields: Date and Narration */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="voucherDate">Date</Label>
               <Input
-                id="date"
+                id="voucherDate"
                 type="date"
                 value={voucherDate}
                 onChange={(e) => setVoucherDate(e.target.value)}
               />
             </div>
-            <div className="md:col-span-2">
+            <div className="space-y-2">
               <Label htmlFor="narration">Narration / Description</Label>
               <Input
                 id="narration"
-                placeholder="Enter transaction description..."
+                placeholder="Enter description..."
                 value={narration}
                 onChange={(e) => setNarration(e.target.value)}
               />
@@ -467,189 +539,283 @@ export default function VouchersPage() {
 
           <Separator />
 
-          {/* Tips */}
-          <Collapsible open={showTips} onOpenChange={setShowTips}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between"
-              >
-                <span className="text-sm text-muted-foreground">
-                  💡 Quick Tips for {voucherInfo.title}
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${
-                    showTips ? "rotate-180" : ""
-                  }`}
-                />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground mt-2">
-                {voucherInfo.description}
+          {/* Cash Receipt Form */}
+          {voucherType === "receipt" && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  <strong>Cash Receipt:</strong> Money received into Cash
+                  account from another account. Cash will be{" "}
+                  <span className="font-semibold">debited</span>, and the
+                  selected account will be{" "}
+                  <span className="font-semibold">credited</span>.
+                </p>
               </div>
-            </CollapsibleContent>
-          </Collapsible>
 
-          {/* Account Lines */}
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[40%]">Account</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right w-32">Debit</TableHead>
-                  <TableHead className="text-right w-32">Credit</TableHead>
-                  <TableHead className="w-12"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {lines.map((line) => (
-                  <TableRow key={line.id}>
-                    <TableCell>
-                      <Select
-                        value={line.accountId}
-                        onValueChange={(val) =>
-                          updateLine(line.id, "accountId", val)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select account..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {accounts.map((acc) => (
-                            <SelectItem key={acc.id} value={acc.id}>
-                              <span className="font-mono text-xs mr-2">
-                                {acc.account_code}
-                              </span>
-                              {acc.account_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        placeholder="Line description"
-                        value={line.description}
-                        onChange={(e) =>
-                          updateLine(line.id, "description", e.target.value)
-                        }
-                        className="h-9"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={line.debit || ""}
-                        onChange={(e) =>
-                          updateLine(
-                            line.id,
-                            "debit",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                        className="text-right h-9"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        value={line.credit || ""}
-                        onChange={(e) =>
-                          updateLine(
-                            line.id,
-                            "credit",
-                            parseFloat(e.target.value) || 0
-                          )
-                        }
-                        className="text-right h-9"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeLine(line.id)}
-                        disabled={lines.length <= 2}
-                        className="h-8 w-8"
-                      >
-                        <Trash2 className="h-4 w-4 text-muted-foreground hover:text-red-600" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Received From (Credit Account)</Label>
+                  <SearchableAccountSelect
+                    value={selectedAccountId}
+                    onValueChange={(id, account) => {
+                      setSelectedAccountId(id);
+                      setSelectedAccountName(account?.account_name || "");
+                    }}
+                    placeholder="Search and select account..."
+                    excludeAccountId={cashAccount?.id}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
 
-                {/* Totals Row */}
-                <TableRow className="bg-muted/50 font-bold">
-                  <TableCell colSpan={2} className="text-right">
-                    Total
-                  </TableCell>
-                  <TableCell className="text-right text-green-600">
-                    Rs.{" "}
-                    {totalDebit.toLocaleString("en-PK", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </TableCell>
-                  <TableCell className="text-right text-red-600">
-                    Rs.{" "}
-                    {totalCredit.toLocaleString("en-PK", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </TableCell>
-                  <TableCell></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Add Line Button */}
-          <Button variant="outline" size="sm" onClick={addLine}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Line
-          </Button>
-
-          {/* Balance Status */}
-          <div
-            className={`p-4 rounded-lg flex items-center justify-between ${
-              isBalanced
-                ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300"
-                : "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              {isBalanced ? (
-                <>
-                  <TrendingUp className="h-5 w-5" />
-                  <span>Voucher is balanced</span>
-                </>
-              ) : (
-                <>
-                  <X className="h-5 w-5" />
-                  <span>
-                    Difference: Rs.{" "}
-                    {Math.abs(totalDebit - totalCredit).toLocaleString(
-                      "en-PK",
-                      {
-                        minimumFractionDigits: 2,
-                      }
-                    )}
-                  </span>
-                </>
+              {cashAccount && (
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Cash Account:{" "}
+                    <span className="font-medium text-foreground">
+                      {cashAccount.account_name}
+                    </span>
+                    <span className="ml-2 font-mono text-xs">
+                      ({cashAccount.account_code})
+                    </span>
+                  </p>
+                </div>
               )}
             </div>
-            <span className="text-sm">
-              Debit: Rs. {totalDebit.toLocaleString()} | Credit: Rs.{" "}
-              {totalCredit.toLocaleString()}
-            </span>
-          </div>
+          )}
+
+          {/* Cash Payment Form */}
+          {voucherType === "payment" && (
+            <div className="space-y-4">
+              <div className="bg-orange-50 dark:bg-orange-950 p-4 rounded-lg">
+                <p className="text-sm text-orange-700 dark:text-orange-300">
+                  <strong>Cash Payment:</strong> Money paid from Cash account to
+                  another account. The selected account will be{" "}
+                  <span className="font-semibold">debited</span>, and Cash will
+                  be <span className="font-semibold">credited</span>.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Paid To (Debit Account)</Label>
+                  <SearchableAccountSelect
+                    value={selectedAccountId}
+                    onValueChange={(id, account) => {
+                      setSelectedAccountId(id);
+                      setSelectedAccountName(account?.account_name || "");
+                    }}
+                    placeholder="Search and select account..."
+                    excludeAccountId={cashAccount?.id}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Amount</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              {cashAccount && (
+                <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Cash Account:{" "}
+                    <span className="font-medium text-foreground">
+                      {cashAccount.account_name}
+                    </span>
+                    <span className="ml-2 font-mono text-xs">
+                      ({cashAccount.account_code})
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Journal Entry Form */}
+          {voucherType === "journal" && (
+            <div className="space-y-4">
+              <div className="bg-purple-50 dark:bg-purple-950 p-4 rounded-lg">
+                <p className="text-sm text-purple-700 dark:text-purple-300">
+                  <strong>Journal Entry:</strong> Record transfers between any
+                  accounts. Total debits must equal total credits.
+                </p>
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[40%]">Account</TableHead>
+                    <TableHead className="w-[25%] text-right">Debit</TableHead>
+                    <TableHead className="w-[25%] text-right">Credit</TableHead>
+                    <TableHead className="w-[10%]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {journalLines.map((line, index) => (
+                    <TableRow key={line.id}>
+                      <TableCell>
+                        <SearchableAccountSelect
+                          value={line.accountId}
+                          onValueChange={(id, account) => {
+                            updateJournalLine(line.id, "accountId", id);
+                            updateJournalLine(
+                              line.id,
+                              "accountName",
+                              account?.account_name || ""
+                            );
+                          }}
+                          placeholder="Select account..."
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          value={line.debit || ""}
+                          onChange={(e) =>
+                            updateJournalLine(
+                              line.id,
+                              "debit",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          min="0"
+                          step="0.01"
+                          className="text-right"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          value={line.credit || ""}
+                          onChange={(e) =>
+                            updateJournalLine(
+                              line.id,
+                              "credit",
+                              parseFloat(e.target.value) || 0
+                            )
+                          }
+                          min="0"
+                          step="0.01"
+                          className="text-right"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeJournalLine(line.id)}
+                          disabled={journalLines.length <= 2}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {/* Totals Row */}
+                  <TableRow className="bg-muted/50 font-medium">
+                    <TableCell>Total</TableCell>
+                    <TableCell className="text-right">
+                      {journalTotals.debit.toLocaleString("en-PK", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {journalTotals.credit.toLocaleString("en-PK", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+              <div className="flex items-center justify-between">
+                <Button variant="outline" size="sm" onClick={addJournalLine}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Line
+                </Button>
+
+                {!isJournalBalanced && journalTotals.debit > 0 && (
+                  <Badge variant="destructive">
+                    Difference:{" "}
+                    {Math.abs(
+                      journalTotals.debit - journalTotals.credit
+                    ).toLocaleString("en-PK", { minimumFractionDigits: 2 })}
+                  </Badge>
+                )}
+                {isJournalBalanced && journalTotals.debit > 0 && (
+                  <Badge
+                    variant="outline"
+                    className="border-green-500 text-green-600"
+                  >
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Balanced
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Opening Balance Form */}
+          {voucherType === "opening" && (
+            <div className="space-y-4">
+              <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  <strong>Opening Balance:</strong> Set initial balance for an
+                  account. Positive amount = Debit balance, Negative amount =
+                  Credit balance.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Account</Label>
+                  <SearchableAccountSelect
+                    value={selectedAccountId}
+                    onValueChange={(id, account) => {
+                      setSelectedAccountId(id);
+                      setSelectedAccountName(account?.account_name || "");
+                    }}
+                    placeholder="Search and select account..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">Opening Balance</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="0.00 (positive=debit, negative=credit)"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    step="0.01"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <Separator />
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3">
@@ -657,9 +823,13 @@ export default function VouchersPage() {
               <X className="h-4 w-4 mr-2" />
               Clear
             </Button>
-            <Button onClick={saveVoucher} disabled={saving || !isBalanced}>
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Voucher"}
+            <Button onClick={saveVoucher} disabled={saving}>
+              {saving ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save Voucher
             </Button>
           </div>
         </CardContent>

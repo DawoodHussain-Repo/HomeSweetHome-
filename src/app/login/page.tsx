@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { login } from "@/services/auth.service";
+import { AUTH_CONFIG } from "@/config/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,26 +24,12 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const supabase = createClient();
-      const { data: user, error: queryError } = await supabase
-        .from("users")
-        .select("*")
-        .eq("email", email.toLowerCase())
-        .eq("password_hash", password)
-        .single();
+      const result = await login(email, password);
 
-      console.log("Login attempt:", {
-        email: email.toLowerCase(),
-        queryError,
-        user,
-      });
-
-      if (queryError || !user) {
-        setError(queryError?.message || "Invalid email or password");
+      if (!result.success) {
+        setError(result.error || "Invalid email or password");
       } else {
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("user_id", user.id);
-        router.push("/dashboard");
+        router.push(AUTH_CONFIG.routes.dashboard);
         router.refresh();
       }
     } catch {
@@ -70,6 +57,8 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
+            autoComplete="email"
+            className="h-11"
           />
         </div>
 
@@ -81,7 +70,7 @@ export default function LoginPage() {
           required
         />
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full h-11" disabled={loading}>
           {loading ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (

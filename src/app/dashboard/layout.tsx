@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { PageLoader } from "@/components/shared/LoadingStates";
+import { getAuthState } from "@/services/auth.service";
 
 interface User {
   id: string;
@@ -21,21 +23,34 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Check unified auth state
+    const authState = getAuthState();
+
+    if (authState?.isAuthenticated) {
+      setUser({
+        id: authState.userId,
+        email: authState.email,
+        name: authState.name,
+      });
     } else {
-      router.push("/login");
+      // Fallback to old storage for backwards compatibility
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const parsed = JSON.parse(storedUser);
+          setUser(parsed);
+        } catch {
+          router.push("/login");
+        }
+      } else {
+        router.push("/login");
+      }
     }
     setLoading(false);
   }, [router]);
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) {
@@ -44,10 +59,10 @@ export default function DashboardLayout({
 
   return (
     <LanguageProvider>
-      <div className="flex h-screen bg-muted/30">
+      <div className="flex h-screen bg-background">
         <Sidebar user={{ email: user.email, name: user.name }} />
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-6 lg:p-8">{children}</div>
+        <main className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="min-h-full">{children}</div>
         </main>
       </div>
     </LanguageProvider>
