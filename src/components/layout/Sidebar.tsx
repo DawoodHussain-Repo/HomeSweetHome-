@@ -42,15 +42,16 @@ export default function Sidebar({ user }: SidebarProps) {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Carbon Style */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 z-40 w-64 bg-card border-r border-border",
+          "fixed lg:static inset-y-0 z-40 w-64 bg-sidebar border-r border-sidebar-border",
+          "flex flex-col justify-between py-8 overflow-x-hidden",
           "transform transition-transform duration-300 ease-in-out lg:transform-none",
           isRTL ? "right-0" : "left-0",
           isOpen
@@ -60,15 +61,21 @@ export default function Sidebar({ user }: SidebarProps) {
             : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="flex flex-col h-full">
-          <SidebarLogo />
-          <SidebarNav items={navItems} onItemClick={() => setIsOpen(false)} />
+        {/* Logo */}
+        <SidebarLogo />
 
-          <div className="p-4 border-t border-border flex justify-center">
+        {/* Navigation */}
+        <SidebarNav items={navItems} onItemClick={() => setIsOpen(false)} />
+
+        {/* Bottom Section */}
+        <div className="space-y-2">
+          {/* Theme & Language Toggles */}
+          <div className="px-6 flex items-center justify-center gap-2 animate-in-left delay-200">
             <ThemeToggle />
+            <LanguageToggle />
           </div>
 
-          <LanguageToggle />
+          {/* User Menu */}
           <UserMenu user={user} />
         </div>
       </aside>

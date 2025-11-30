@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface PasswordInputProps {
@@ -28,9 +27,11 @@ export function PasswordInput({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} className="text-zinc-300 text-sm font-medium">
+        {label}
+      </Label>
       <div className="relative">
-        <Input
+        <input
           id={id}
           type={showPassword ? "text" : "password"}
           value={value}
@@ -38,12 +39,12 @@ export function PasswordInput({
           placeholder={placeholder}
           required={required}
           minLength={minLength}
-          className="pr-10"
+          className="w-full h-11 px-4 pr-10 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
         >
           {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>

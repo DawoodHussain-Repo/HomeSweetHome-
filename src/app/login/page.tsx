@@ -6,8 +6,6 @@ import Link from "next/link";
 import { LogIn } from "lucide-react";
 import { login } from "@/services/auth.service";
 import { AUTH_CONFIG } from "@/config/constants";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthCard, AuthError, PasswordInput } from "@/components/auth";
 
@@ -47,10 +45,12 @@ export default function LoginPage() {
     >
       <AuthError message={error} />
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      <form onSubmit={handleLogin} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
-          <Input
+          <Label htmlFor="email" className="text-zinc-300 text-sm font-medium">
+            Email Address
+          </Label>
+          <input
             id="email"
             type="email"
             value={email}
@@ -58,7 +58,7 @@ export default function LoginPage() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="h-11"
+            className="w-full h-11 px-4 bg-zinc-800/50 border border-zinc-700/50 rounded-xl text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
           />
         </div>
 
@@ -70,23 +70,27 @@ export default function LoginPage() {
           required
         />
 
-        <Button type="submit" className="w-full h-11" disabled={loading}>
+        <button
+          type="submit"
+          className="w-full h-11 bg-white text-zinc-900 rounded-xl font-semibold hover:bg-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+          disabled={loading}
+        >
           {loading ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <LogIn className="mr-2 h-4 w-4" />
+              <LogIn className="h-4 w-4" />
               Sign In
             </>
           )}
-        </Button>
+        </button>
       </form>
 
-      <p className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-zinc-400 mt-4">
         Don&apos;t have an account?{" "}
         <Link
           href="/register"
-          className="text-primary hover:underline font-medium"
+          className="text-white hover:underline font-medium"
         >
           Create one
         </Link>

@@ -1,13 +1,18 @@
 /**
  * useDashboard Hook
- * Provides dashboard statistics and data
+ * Provides dashboard statistics and data with caching
  */
 
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getDashboardStats, getMonthlyData } from "@/services/reports.service";
-import { getRecentTransactions } from "@/services/vouchers.service";
+import {
+  getDashboardStats,
+  getMonthlyChartData,
+  getRecentTransactions,
+  invalidateDashboardCache,
+} from "@/services/dashboard.service";
+import { parseAmount } from "@/lib/api/utils";
 import type { DashboardStats, MonthlyData } from "@/types";
 
 interface RecentTransaction {
@@ -28,6 +33,7 @@ interface UseDashboardReturn {
   isLoading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
+  invalidateCache: () => void;
 }
 
 const initialStats: DashboardStats = {
@@ -55,9 +61,10 @@ export function useDashboard(): UseDashboardReturn {
     setError(null);
 
     try {
+      // Fetch all data in parallel
       const [statsData, monthly, recent] = await Promise.all([
         getDashboardStats(),
-        getMonthlyData(6),
+        getMonthlyChartData(6),
         getRecentTransactions(10),
       ]);
 
@@ -65,7 +72,6 @@ export function useDashboard(): UseDashboardReturn {
       setMonthlyData(monthly);
 
       // Transform recent transactions
-      // Data structure: transactions table with transaction_details as child and voucher_types
       const transformed: RecentTransaction[] = recent.map(
         (t: Record<string, unknown>) => {
           const details = (t.transaction_details || []) as Array<{
@@ -75,29 +81,26 @@ export function useDashboard(): UseDashboardReturn {
             accounts: { account_name: string } | null;
           }>;
 
-          const voucherType = t.voucher_types as {
-            code: number;
-            title: string;
-          } | null;
+          const voucherTypeCode = t.voucher_type_code as number;
 
-          // Sum up debits and credits from details
+          // Sum up debits and credits
           const totalDebit = details.reduce(
-            (sum, d) => sum + (parseFloat(String(d.debit_amount)) || 0),
+            (sum, d) => sum + parseAmount(d.debit_amount),
             0
           );
           const totalCredit = details.reduce(
-            (sum, d) => sum + (parseFloat(String(d.credit_amount)) || 0),
+            (sum, d) => sum + parseAmount(d.credit_amount),
             0
           );
 
-          // Get first account name from details
+          // Get first account name
           const firstAccount = details[0]?.accounts?.account_name || "Multiple";
 
           return {
             id: t.id as string,
             date: t.transaction_date as string,
             voucherNo: (t.voucher_number as string) || "-",
-            voucherType: voucherType?.code || 0,
+            voucherType: voucherTypeCode || 0,
             accountName: firstAccount,
             narration: (t.narration as string) || "",
             amount: Math.max(totalDebit, totalCredit),
@@ -117,6 +120,11 @@ export function useDashboard(): UseDashboardReturn {
     }
   }, []);
 
+  const invalidateCache = useCallback(() => {
+    invalidateDashboardCache();
+    fetchData();
+  }, [fetchData]);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -128,5 +136,6 @@ export function useDashboard(): UseDashboardReturn {
     isLoading,
     error,
     refetch: fetchData,
+    invalidateCache,
   };
 }

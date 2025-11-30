@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { format, startOfMonth, endOfMonth } from "date-fns";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,8 @@ import {
   Printer,
   ArrowUpRight,
   ArrowDownRight,
+  Eye,
+  BookOpen,
 } from "lucide-react";
 
 interface Account {
@@ -198,22 +201,32 @@ export default function LedgerPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Account Ledger</h1>
-        <p className="text-muted-foreground mt-1">
-          View detailed transaction history for any account
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+          <BookOpen className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+        </div>
+        <div>
+          <h1 className="text-xl font-semibold text-foreground tracking-tight">
+            Account Ledger
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            View detailed transaction history for any account
+          </p>
+        </div>
       </div>
 
       {/* Filters Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FileText className="h-5 w-5" />
+      <Card className="border bg-card backdrop-blur-sm">
+        <CardHeader className="border-b">
+          <CardTitle className="text-base font-medium text-foreground flex items-center gap-2">
+            <FileText
+              className="h-4 w-4 text-muted-foreground"
+              strokeWidth={1.5}
+            />
             Select Account & Date Range
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <AccountSelector
             selectedAccountId={selectedAccount?.id || null}
             onAccountSelect={setSelectedAccount}
@@ -237,16 +250,25 @@ export default function LedgerPage() {
             <Button
               onClick={fetchLedger}
               disabled={!selectedAccount || loading}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {loading ? "Loading..." : "View Ledger"}
             </Button>
             {entries.length > 0 && (
               <>
-                <Button variant="outline" size="icon">
-                  <Printer className="h-4 w-4" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border hover:bg-muted text-muted-foreground hover:text-foreground"
+                >
+                  <Printer className="h-4 w-4" strokeWidth={1.5} />
                 </Button>
-                <Button variant="outline" size="icon">
-                  <Download className="h-4 w-4" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border hover:bg-muted text-muted-foreground hover:text-foreground"
+                >
+                  <Download className="h-4 w-4" strokeWidth={1.5} />
                 </Button>
               </>
             )}
@@ -256,11 +278,11 @@ export default function LedgerPage() {
 
       {/* Ledger Display */}
       {selectedAccount && (
-        <Card>
-          <CardHeader>
+        <Card className="border bg-card backdrop-blur-sm">
+          <CardHeader className="border-b">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <CardTitle>
+                <CardTitle className="text-foreground">
                   {selectedAccount.account_code} -{" "}
                   {selectedAccount.account_name}
                 </CardTitle>
@@ -271,21 +293,25 @@ export default function LedgerPage() {
                 )}
               </div>
               <div className="flex gap-4 text-sm">
-                <div className="text-center">
-                  <p className="text-muted-foreground">Opening</p>
+                <div className="text-center px-4 py-2 rounded-lg bg-muted">
+                  <p className="text-muted-foreground text-xs">Opening</p>
                   <p
                     className={`font-bold ${
-                      openingBalance >= 0 ? "text-green-600" : "text-red-600"
+                      openingBalance >= 0
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {formatCurrency(openingBalance)}
                   </p>
                 </div>
-                <div className="text-center">
-                  <p className="text-muted-foreground">Closing</p>
+                <div className="text-center px-4 py-2 rounded-lg bg-muted">
+                  <p className="text-muted-foreground text-xs">Closing</p>
                   <p
                     className={`font-bold ${
-                      closingBalance >= 0 ? "text-green-600" : "text-red-600"
+                      closingBalance >= 0
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {formatCurrency(closingBalance)}
@@ -294,131 +320,315 @@ export default function LedgerPage() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-muted-foreground border-t-foreground rounded-full animate-spin" />
               </div>
             ) : entries.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <FileText
+                  className="h-12 w-12 mx-auto mb-4 opacity-50"
+                  strokeWidth={1.5}
+                />
                 <p>No transactions found for the selected period</p>
               </div>
             ) : (
               <>
-                <div className="overflow-x-auto">
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto rounded-lg border border-border">
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-24">Date</TableHead>
-                        <TableHead className="w-20">V.No</TableHead>
-                        <TableHead className="w-28">Type</TableHead>
-                        <TableHead>Narration</TableHead>
-                        <TableHead className="text-right w-28">Debit</TableHead>
-                        <TableHead className="text-right w-28">
+                      <TableRow className="border-border bg-secondary/30 hover:bg-secondary/30">
+                        <TableHead className="w-24 text-muted-foreground font-medium text-xs">
+                          Date
+                        </TableHead>
+                        <TableHead className="w-16 text-muted-foreground font-medium text-xs">
+                          V.No
+                        </TableHead>
+                        <TableHead className="w-24 text-muted-foreground font-medium text-xs">
+                          Type
+                        </TableHead>
+                        <TableHead className="text-muted-foreground font-medium text-xs">
+                          Narration
+                        </TableHead>
+                        <TableHead className="text-right w-24 text-muted-foreground font-medium text-xs">
+                          Debit
+                        </TableHead>
+                        <TableHead className="text-right w-24 text-muted-foreground font-medium text-xs">
                           Credit
                         </TableHead>
-                        <TableHead className="text-right w-32">
+                        <TableHead className="text-right w-28 text-muted-foreground font-medium text-xs">
                           Balance
                         </TableHead>
+                        <TableHead className="w-10 text-muted-foreground font-medium"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {/* Opening Balance Row */}
-                      <TableRow className="bg-muted/50">
-                        <TableCell colSpan={4} className="font-medium">
+                      <TableRow className="border-border bg-secondary/20">
+                        <TableCell
+                          colSpan={4}
+                          className="font-medium text-muted-foreground text-xs"
+                        >
                           Opening Balance
                         </TableCell>
-                        <TableCell className="text-right">-</TableCell>
-                        <TableCell className="text-right">-</TableCell>
+                        <TableCell className="text-right text-muted-foreground/50 text-xs">
+                          -
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground/50 text-xs">
+                          -
+                        </TableCell>
                         <TableCell
-                          className={`text-right font-medium ${
+                          className={`text-right font-medium text-xs ${
                             openingBalance >= 0
-                              ? "text-green-600"
-                              : "text-red-600"
+                              ? "text-emerald-400"
+                              : "text-rose-400"
                           }`}
                         >
                           {formatCurrency(openingBalance)}
                           {openingBalance >= 0 ? " Dr" : " Cr"}
                         </TableCell>
+                        <TableCell></TableCell>
                       </TableRow>
 
                       {entriesWithBalance.map((entry) => (
-                        <TableRow key={entry.id}>
-                          <TableCell className="font-mono text-sm">
+                        <TableRow
+                          key={entry.id}
+                          className="border-border hover:bg-secondary/30"
+                        >
+                          <TableCell className="font-mono text-xs text-muted-foreground">
                             {format(
                               new Date(entry.transaction_date),
-                              "dd/MM/yyyy"
+                              "dd/MM/yy"
                             )}
                           </TableCell>
-                          <TableCell className="font-mono text-sm">
+                          <TableCell className="font-mono text-xs text-muted-foreground">
                             {entry.legacy_tr_no || "-"}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge
+                              variant="outline"
+                              className="text-[10px] border-border bg-secondary text-muted-foreground px-1.5 py-0"
+                            >
                               {getVoucherTypeLabel(entry.voucher_type_code)}
                             </Badge>
                           </TableCell>
-                          <TableCell className="max-w-xs truncate">
+                          <TableCell className="max-w-xs truncate text-foreground text-xs">
                             {language === "ur" && entry.narration_urdu
                               ? entry.narration_urdu
                               : entry.narration || "-"}
                           </TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="text-right font-mono text-xs">
                             {entry.debit_amount > 0 ? (
-                              <span className="text-green-600 flex items-center justify-end gap-1">
-                                <ArrowUpRight className="h-3 w-3" />
+                              <span className="text-emerald-600 dark:text-emerald-400 flex items-center justify-end gap-1">
+                                <ArrowUpRight
+                                  className="h-2.5 w-2.5"
+                                  strokeWidth={1.5}
+                                />
                                 {formatCurrency(entry.debit_amount)}
                               </span>
                             ) : (
-                              "-"
+                              <span className="text-muted-foreground/50">
+                                -
+                              </span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="text-right font-mono text-xs">
                             {entry.credit_amount > 0 ? (
-                              <span className="text-red-600 flex items-center justify-end gap-1">
-                                <ArrowDownRight className="h-3 w-3" />
+                              <span className="text-rose-600 dark:text-rose-400 flex items-center justify-end gap-1">
+                                <ArrowDownRight
+                                  className="h-2.5 w-2.5"
+                                  strokeWidth={1.5}
+                                />
                                 {formatCurrency(entry.credit_amount)}
                               </span>
                             ) : (
-                              "-"
+                              <span className="text-muted-foreground/50">
+                                -
+                              </span>
                             )}
                           </TableCell>
                           <TableCell
-                            className={`text-right font-mono font-medium ${
+                            className={`text-right font-mono font-medium text-xs ${
                               entry.balance >= 0
-                                ? "text-green-600"
-                                : "text-red-600"
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-rose-600 dark:text-rose-400"
                             }`}
                           >
                             {formatCurrency(entry.balance)}
                             {entry.balance >= 0 ? " Dr" : " Cr"}
                           </TableCell>
+                          <TableCell>
+                            <Link
+                              href={`/dashboard/vouchers/${entry.transaction_id}`}
+                            >
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 hover:bg-secondary text-muted-foreground hover:text-foreground"
+                              >
+                                <Eye
+                                  className="h-3.5 w-3.5"
+                                  strokeWidth={1.5}
+                                />
+                              </Button>
+                            </Link>
+                          </TableCell>
                         </TableRow>
                       ))}
 
                       {/* Totals Row */}
-                      <TableRow className="bg-muted/50 font-bold">
-                        <TableCell colSpan={4}>Total</TableCell>
-                        <TableCell className="text-right text-green-600">
+                      <TableRow className="border-border bg-secondary/30 font-bold">
+                        <TableCell
+                          colSpan={4}
+                          className="text-foreground text-xs"
+                        >
+                          Total
+                        </TableCell>
+                        <TableCell className="text-right text-emerald-600 dark:text-emerald-400 text-xs">
                           {formatCurrency(totalDebit)}
                         </TableCell>
-                        <TableCell className="text-right text-red-600">
+                        <TableCell className="text-right text-rose-600 dark:text-rose-400 text-xs">
                           {formatCurrency(totalCredit)}
                         </TableCell>
                         <TableCell
-                          className={`text-right ${
+                          className={`text-right text-xs ${
                             closingBalance >= 0
-                              ? "text-green-600"
-                              : "text-red-600"
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400"
                           }`}
                         >
                           {formatCurrency(closingBalance)}
                           {closingBalance >= 0 ? " Dr" : " Cr"}
                         </TableCell>
+                        <TableCell></TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-2">
+                  {/* Opening Balance Card */}
+                  <div className="p-3 rounded-lg bg-secondary/30 border border-border">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground text-xs">
+                        Opening Balance
+                      </span>
+                      <span
+                        className={`font-mono text-sm font-medium ${
+                          openingBalance >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-600 dark:text-rose-400"
+                        }`}
+                      >
+                        {formatCurrency(openingBalance)}{" "}
+                        {openingBalance >= 0 ? "Dr" : "Cr"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Transaction Cards */}
+                  {entriesWithBalance.map((entry) => (
+                    <Link
+                      key={entry.id}
+                      href={`/dashboard/vouchers/${entry.transaction_id}`}
+                      className="block"
+                    >
+                      <div className="p-3 rounded-lg bg-secondary/20 border border-border hover:bg-secondary/30 transition-colors">
+                        {/* Top Row - Date and Type */}
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground text-xs font-mono">
+                              {format(
+                                new Date(entry.transaction_date),
+                                "dd/MM/yy"
+                              )}
+                            </span>
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] border-border bg-secondary text-muted-foreground px-1.5 py-0"
+                            >
+                              {getVoucherTypeLabel(entry.voucher_type_code)}
+                            </Badge>
+                          </div>
+                          {entry.legacy_tr_no && (
+                            <span className="text-muted-foreground/70 text-xs font-mono">
+                              #{entry.legacy_tr_no}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Narration */}
+                        {(entry.narration || entry.narration_urdu) && (
+                          <p className="text-foreground text-xs mb-2 line-clamp-1">
+                            {language === "ur" && entry.narration_urdu
+                              ? entry.narration_urdu
+                              : entry.narration}
+                          </p>
+                        )}
+
+                        {/* Amounts Row */}
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex gap-3">
+                            {entry.debit_amount > 0 && (
+                              <span className="text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-0.5">
+                                <ArrowUpRight className="h-2.5 w-2.5" />
+                                {formatCurrency(entry.debit_amount)}
+                              </span>
+                            )}
+                            {entry.credit_amount > 0 && (
+                              <span className="text-rose-600 dark:text-rose-400 font-mono flex items-center gap-0.5">
+                                <ArrowDownRight className="h-2.5 w-2.5" />
+                                {formatCurrency(entry.credit_amount)}
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className={`font-mono font-medium ${
+                              entry.balance >= 0
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-rose-600 dark:text-rose-400"
+                            }`}
+                          >
+                            {formatCurrency(entry.balance)}{" "}
+                            {entry.balance >= 0 ? "Dr" : "Cr"}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+
+                  {/* Total Card */}
+                  <div className="p-3 rounded-lg bg-secondary/30 border border-border">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-foreground font-medium">Total</span>
+                      <div className="flex gap-3">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-mono">
+                          {formatCurrency(totalDebit)}
+                        </span>
+                        <span className="text-rose-600 dark:text-rose-400 font-mono">
+                          {formatCurrency(totalCredit)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-muted-foreground text-xs">
+                        Closing Balance
+                      </span>
+                      <span
+                        className={`font-mono text-sm font-medium ${
+                          closingBalance >= 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-600 dark:text-rose-400"
+                        }`}
+                      >
+                        {formatCurrency(closingBalance)}{" "}
+                        {closingBalance >= 0 ? "Dr" : "Cr"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-4 text-sm text-muted-foreground text-center">

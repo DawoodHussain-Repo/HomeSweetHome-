@@ -231,7 +231,7 @@ export async function getRecentTransactions(limit: number = 10) {
       voucher_number,
       narration,
       total_amount,
-      voucher_type_id,
+      voucher_type_code,
       transaction_details (
         debit_amount,
         credit_amount,
@@ -251,23 +251,26 @@ export async function getRecentTransactions(limit: number = 10) {
     return [];
   }
 
-  // Fetch voucher types separately to avoid join issues
-  if (data && data.length > 0) {
-    const voucherTypeIds = [...new Set(data.map((t) => t.voucher_type_id))];
-    const { data: voucherTypes } = await supabase
-      .from("voucher_types")
-      .select("id, code, title")
-      .in("id", voucherTypeIds);
+  // Map voucher_type_code to voucher type info
+  const getVoucherTypeInfo = (code: number) => {
+    switch (code) {
+      case 101:
+        return { code: 101, title: "Cash Receipt" };
+      case 102:
+        return { code: 102, title: "Cash Payment" };
+      case 201:
+        return { code: 201, title: "Journal" };
+      case 301:
+        return { code: 301, title: "Opening" };
+      default:
+        return { code, title: `V-${code}` };
+    }
+  };
 
-    const vtMap = new Map(voucherTypes?.map((vt) => [vt.id, vt]) || []);
-
-    return data.map((t) => ({
-      ...t,
-      voucher_types: vtMap.get(t.voucher_type_id) || null,
-    }));
-  }
-
-  return data || [];
+  return (data || []).map((t) => ({
+    ...t,
+    voucher_types: getVoucherTypeInfo(t.voucher_type_code),
+  }));
 }
 
 /**

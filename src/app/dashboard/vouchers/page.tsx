@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import {
   Plus,
   Save,
@@ -484,17 +485,26 @@ export default function VouchersPage() {
   if (!userId) {
     return (
       <div className="p-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Authentication Required</AlertTitle>
-          <AlertDescription>
-            Please{" "}
-            <a href="/login" className="underline font-medium">
-              login
-            </a>{" "}
-            to create vouchers.
-          </AlertDescription>
-        </Alert>
+        <div className="spotlight-card bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-red-400 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-red-400">
+                Authentication Required
+              </h3>
+              <p className="text-sm text-red-300/80 mt-1">
+                Please{" "}
+                <a
+                  href="/login"
+                  className="underline font-medium text-red-400 hover:text-red-300"
+                >
+                  login
+                </a>{" "}
+                to create vouchers.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -504,113 +514,163 @@ export default function VouchersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="heading-primary">Voucher Entry</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight-custom">
+            Voucher Entry
+          </h1>
           <p className="text-muted-foreground text-sm sm:text-base mt-1">
             Create cash receipts, payments, and journal entries
           </p>
         </div>
         {lastVoucherNo && (
-          <Badge variant="outline" className="text-sm py-1 px-3 glass">
+          <div className="text-sm py-1 px-3 bg-secondary border border-border rounded-xl text-muted-foreground backdrop-blur-sm">
             Last: {lastVoucherNo}
-          </Badge>
+          </div>
         )}
       </div>
 
       {/* Message Alert */}
       {message && (
-        <Alert
-          variant={message.type === "error" ? "destructive" : "default"}
-          className={
+        <div
+          className={cn(
+            "rounded-xl p-4 border backdrop-blur-sm",
             message.type === "success"
-              ? "border-green-500 bg-green-50 dark:bg-green-950"
-              : ""
-          }
-        >
-          {message.type === "success" ? (
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          ) : (
-            <AlertCircle className="h-4 w-4" />
+              ? "bg-emerald-500/10 border-emerald-500/20"
+              : "bg-red-500/10 border-red-500/20"
           )}
-          <AlertTitle>
-            {message.type === "success" ? "Success" : "Error"}
-          </AlertTitle>
-          <AlertDescription>{message.text}</AlertDescription>
-        </Alert>
+        >
+          <div className="flex items-start gap-3">
+            {message.type === "success" ? (
+              <CheckCircle className="h-5 w-5 text-emerald-400 mt-0.5" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-red-400 mt-0.5" />
+            )}
+            <div>
+              <h3
+                className={cn(
+                  "font-medium",
+                  message.type === "success"
+                    ? "text-emerald-400"
+                    : "text-red-400"
+                )}
+              >
+                {message.type === "success" ? "Success" : "Error"}
+              </h3>
+              <p
+                className={cn(
+                  "text-sm mt-1",
+                  message.type === "success"
+                    ? "text-emerald-300/80"
+                    : "text-red-300/80"
+                )}
+              >
+                {message.text}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Main Form Card */}
-      <Card className="glass-card">
-        <CardHeader className="pb-4">
+      <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border border-border overflow-hidden">
+        <div className="p-6 border-b border-border">
           <Tabs
             value={voucherType}
             onValueChange={(v) => handleVoucherTypeChange(v as VoucherType)}
           >
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="receipt" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-4 bg-secondary p-1 rounded-xl">
+              <TabsTrigger
+                value="receipt"
+                className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
                 <Receipt className="h-4 w-4" />
                 <span className="hidden sm:inline">Cash Receipt</span>
                 <span className="sm:hidden">Receipt</span>
               </TabsTrigger>
-              <TabsTrigger value="payment" className="flex items-center gap-2">
+              <TabsTrigger
+                value="payment"
+                className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
                 <CreditCard className="h-4 w-4" />
                 <span className="hidden sm:inline">Cash Payment</span>
                 <span className="sm:hidden">Payment</span>
               </TabsTrigger>
-              <TabsTrigger value="journal" className="flex items-center gap-2">
+              <TabsTrigger
+                value="journal"
+                className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Journal Entry</span>
                 <span className="sm:hidden">Journal</span>
               </TabsTrigger>
-              <TabsTrigger value="opening" className="flex items-center gap-2">
+              <TabsTrigger
+                value="opening"
+                className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg transition-all"
+              >
                 <BookOpen className="h-4 w-4" />
                 <span className="hidden sm:inline">Opening Balance</span>
                 <span className="sm:hidden">Opening</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        </CardHeader>
+        </div>
 
-        <CardContent className="space-y-6">
+        <div className="p-6 space-y-6">
           {/* Common Fields: Date and Narration */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="voucherDate">Date</Label>
+              <Label
+                htmlFor="voucherDate"
+                className="text-foreground text-sm font-medium"
+              >
+                Date
+              </Label>
               <Input
                 id="voucherDate"
                 type="date"
                 value={voucherDate}
                 onChange={(e) => setVoucherDate(e.target.value)}
+                className="bg-background border-border text-foreground rounded-xl focus:ring-ring"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="narration">Narration / Description</Label>
+              <Label
+                htmlFor="narration"
+                className="text-foreground text-sm font-medium"
+              >
+                Narration / Description
+              </Label>
               <Input
                 id="narration"
                 placeholder="Enter description..."
                 value={narration}
                 onChange={(e) => setNarration(e.target.value)}
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-ring"
               />
             </div>
           </div>
 
-          <Separator />
+          <div className="border-t border-border" />
 
           {/* Cash Receipt Form */}
           {voucherType === "receipt" && (
             <div className="space-y-4">
-              <div className="glass p-4 rounded-lg border border-blue-500/20">
+              <div className="bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
                 <p className="text-sm text-blue-400">
                   <strong>Cash Receipt:</strong> Money received into Cash
                   account from another account. Cash will be{" "}
-                  <span className="font-semibold text-green-400">debited</span>,
-                  and the selected account will be{" "}
+                  <span className="font-semibold text-emerald-400">
+                    debited
+                  </span>
+                  , and the selected account will be{" "}
                   <span className="font-semibold text-red-400">credited</span>.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Received From (Credit Account)</Label>
+                  <Label className="text-foreground text-sm font-medium">
+                    Received From (Credit Account)
+                  </Label>
                   <SearchableAccountSelect
                     value={selectedAccountId}
                     onValueChange={(id, account) => {
@@ -622,7 +682,12 @@ export default function VouchersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount</Label>
+                  <Label
+                    htmlFor="amount"
+                    className="text-foreground text-sm font-medium"
+                  >
+                    Amount
+                  </Label>
                   <Input
                     id="amount"
                     type="number"
@@ -631,16 +696,17 @@ export default function VouchersPage() {
                     onChange={(e) => setAmount(e.target.value)}
                     min="0"
                     step="0.01"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-ring"
                   />
                 </div>
               </div>
 
               {cashAccount && (
-                <div className="glass p-3 rounded-lg border border-primary/20 flex items-center gap-2">
+                <div className="bg-secondary/50 p-3 rounded-xl border border-border flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">
                     Cash A/C:
                   </span>
-                  <span className="text-sm font-medium text-primary">
+                  <span className="text-sm font-medium text-foreground">
                     {cashAccount.account_name}
                   </span>
                 </div>
@@ -651,19 +717,23 @@ export default function VouchersPage() {
           {/* Cash Payment Form */}
           {voucherType === "payment" && (
             <div className="space-y-4">
-              <div className="glass p-4 rounded-lg border border-orange-500/20">
+              <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20">
                 <p className="text-sm text-orange-400">
                   <strong>Cash Payment:</strong> Money paid from Cash account to
                   another account. The selected account will be{" "}
-                  <span className="font-semibold text-green-400">debited</span>,
-                  and Cash will be{" "}
+                  <span className="font-semibold text-emerald-400">
+                    debited
+                  </span>
+                  , and Cash will be{" "}
                   <span className="font-semibold text-red-400">credited</span>.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Paid To (Debit Account)</Label>
+                  <Label className="text-foreground text-sm font-medium">
+                    Paid To (Debit Account)
+                  </Label>
                   <SearchableAccountSelect
                     value={selectedAccountId}
                     onValueChange={(id, account) => {
@@ -675,7 +745,12 @@ export default function VouchersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Amount</Label>
+                  <Label
+                    htmlFor="amount"
+                    className="text-foreground text-sm font-medium"
+                  >
+                    Amount
+                  </Label>
                   <Input
                     id="amount"
                     type="number"
@@ -684,16 +759,17 @@ export default function VouchersPage() {
                     onChange={(e) => setAmount(e.target.value)}
                     min="0"
                     step="0.01"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-ring"
                   />
                 </div>
               </div>
 
               {cashAccount && (
-                <div className="glass p-3 rounded-lg border border-primary/20 flex items-center gap-2">
+                <div className="bg-secondary/50 p-3 rounded-xl border border-border flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">
                     Cash A/C:
                   </span>
-                  <span className="text-sm font-medium text-primary">
+                  <span className="text-sm font-medium text-foreground">
                     {cashAccount.account_name}
                   </span>
                 </div>
@@ -704,123 +780,139 @@ export default function VouchersPage() {
           {/* Journal Entry Form */}
           {voucherType === "journal" && (
             <div className="space-y-4">
-              <div className="glass p-4 rounded-lg border border-purple-500/20">
+              <div className="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20">
                 <p className="text-sm text-purple-400">
                   <strong>Journal Entry:</strong> Record transfers between any
                   accounts. Total debits must equal total credits.
                 </p>
               </div>
 
-              <Table className="glass-table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40%]">Account</TableHead>
-                    <TableHead className="w-[25%] text-right">Debit</TableHead>
-                    <TableHead className="w-[25%] text-right">Credit</TableHead>
-                    <TableHead className="w-[10%]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {journalLines.map((line, index) => (
-                    <TableRow key={line.id}>
-                      <TableCell>
-                        <SearchableAccountSelect
-                          value={line.accountId}
-                          onValueChange={(id, account) => {
-                            updateJournalLine(line.id, {
-                              accountId: id,
-                              accountName: account?.account_name || "",
-                            });
-                          }}
-                          placeholder="Select account..."
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          value={line.debit || ""}
-                          onChange={(e) =>
-                            updateJournalLine(
-                              line.id,
-                              "debit",
-                              parseFloat(e.target.value) || 0
-                            )
-                          }
-                          min="0"
-                          step="0.01"
-                          className="text-right"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          placeholder="0.00"
-                          value={line.credit || ""}
-                          onChange={(e) =>
-                            updateJournalLine(
-                              line.id,
-                              "credit",
-                              parseFloat(e.target.value) || 0
-                            )
-                          }
-                          min="0"
-                          step="0.01"
-                          className="text-right"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeJournalLine(line.id)}
-                          disabled={journalLines.length <= 2}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+              <div className="overflow-x-auto rounded-xl border border-border">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-border hover:bg-transparent">
+                      <TableHead className="w-[40%] text-muted-foreground text-xs sm:text-sm">
+                        Account
+                      </TableHead>
+                      <TableHead className="w-[25%] text-right text-muted-foreground text-xs sm:text-sm">
+                        Debit
+                      </TableHead>
+                      <TableHead className="w-[25%] text-right text-muted-foreground text-xs sm:text-sm">
+                        Credit
+                      </TableHead>
+                      <TableHead className="w-[10%]"></TableHead>
                     </TableRow>
-                  ))}
-                  {/* Totals Row */}
-                  <TableRow className="glass font-medium">
-                    <TableCell>Total</TableCell>
-                    <TableCell className="text-right">
-                      {journalTotals.debit.toLocaleString("en-PK", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {journalTotals.credit.toLocaleString("en-PK", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {journalLines.map((line, index) => (
+                      <TableRow
+                        key={line.id}
+                        className="border-border hover:bg-secondary/50"
+                      >
+                        <TableCell>
+                          <SearchableAccountSelect
+                            value={line.accountId}
+                            onValueChange={(id, account) => {
+                              updateJournalLine(line.id, {
+                                accountId: id,
+                                accountName: account?.account_name || "",
+                              });
+                            }}
+                            placeholder="Select account..."
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            value={line.debit || ""}
+                            onChange={(e) =>
+                              updateJournalLine(
+                                line.id,
+                                "debit",
+                                parseFloat(e.target.value) || 0
+                              )
+                            }
+                            min="0"
+                            step="0.01"
+                            className="text-right bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            value={line.credit || ""}
+                            onChange={(e) =>
+                              updateJournalLine(
+                                line.id,
+                                "credit",
+                                parseFloat(e.target.value) || 0
+                              )
+                            }
+                            min="0"
+                            step="0.01"
+                            className="text-right bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeJournalLine(line.id)}
+                            disabled={journalLines.length <= 2}
+                            className="text-muted-foreground hover:text-foreground hover:bg-secondary"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {/* Totals Row */}
+                    <TableRow className="bg-secondary/50 border-border font-medium">
+                      <TableCell className="text-muted-foreground text-xs sm:text-sm">
+                        Total
+                      </TableCell>
+                      <TableCell className="text-right text-foreground text-xs sm:text-sm">
+                        {journalTotals.debit.toLocaleString("en-PK", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                      <TableCell className="text-right text-foreground text-xs sm:text-sm">
+                        {journalTotals.credit.toLocaleString("en-PK", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
 
               <div className="flex items-center justify-between">
-                <Button variant="outline" size="sm" onClick={addJournalLine}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addJournalLine}
+                  className="border-border bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Line
                 </Button>
 
                 {!isJournalBalanced && journalTotals.debit > 0 && (
-                  <Badge variant="destructive">
+                  <div className="text-sm py-1 px-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
                     Difference:{" "}
                     {Math.abs(
                       journalTotals.debit - journalTotals.credit
                     ).toLocaleString("en-PK", { minimumFractionDigits: 2 })}
-                  </Badge>
+                  </div>
                 )}
                 {isJournalBalanced && journalTotals.debit > 0 && (
-                  <Badge
-                    variant="outline"
-                    className="border-green-500 text-green-600"
-                  >
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                  <div className="text-sm py-1 px-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
                     Balanced
-                  </Badge>
+                  </div>
                 )}
               </div>
             </div>
@@ -829,8 +921,8 @@ export default function VouchersPage() {
           {/* Opening Balance Form */}
           {voucherType === "opening" && (
             <div className="space-y-4">
-              <div className="glass p-4 rounded-lg border border-green-500/20">
-                <p className="text-sm text-green-400">
+              <div className="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                <p className="text-sm text-emerald-400">
                   <strong>Opening Balance:</strong> Set initial balance for an
                   account. Positive amount ={" "}
                   <span className="font-semibold">Debit</span> balance, Negative
@@ -841,7 +933,9 @@ export default function VouchersPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Account</Label>
+                  <Label className="text-foreground text-sm font-medium">
+                    Account
+                  </Label>
                   <SearchableAccountSelect
                     value={selectedAccountId}
                     onValueChange={(id, account) => {
@@ -852,7 +946,12 @@ export default function VouchersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Opening Balance</Label>
+                  <Label
+                    htmlFor="amount"
+                    className="text-foreground text-sm font-medium"
+                  >
+                    Opening Balance
+                  </Label>
                   <Input
                     id="amount"
                     type="number"
@@ -860,31 +959,40 @@ export default function VouchersPage() {
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     step="0.01"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl focus:ring-ring"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          <Separator />
+          <div className="border-t border-border" />
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={resetForm}>
+            <Button
+              variant="outline"
+              onClick={resetForm}
+              className="border-border bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+            >
               <X className="h-4 w-4 mr-2" />
               Clear
             </Button>
-            <Button onClick={saveVoucher} disabled={saving}>
+            <button
+              onClick={saveVoucher}
+              disabled={saving}
+              className="h-10 px-4 bg-primary text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+            >
               {saving ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-4 w-4" />
               )}
               Save Voucher
-            </Button>
+            </button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -4,13 +4,13 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =============================================================================
-   Design Tokens
+   Design Tokens - Carbon Design System
    ============================================================================= */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -48,127 +48,125 @@
 }
 
 /* =============================================================================
-   Light Theme (Default)
-   Professional Blue & White Enterprise Theme
+   Light Theme - Carbon Inspired
    ============================================================================= */
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
 
-  /* Core Colors */
-  --background: oklch(0.99 0.003 250);
-  --foreground: oklch(0.15 0.02 250);
+  /* Core Colors - Clean whites and grays */
+  --background: #fafafa;
+  --foreground: #18181b;
 
   /* Card & Surface */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 250);
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
 
-  /* Primary - Professional Blue */
-  --primary: oklch(0.52 0.18 250);
-  --primary-foreground: oklch(0.99 0 0);
+  /* Primary - Carbon Black */
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
 
   /* Secondary */
-  --secondary: oklch(0.97 0.015 250);
-  --secondary-foreground: oklch(0.25 0.04 250);
+  --secondary: #f4f4f5;
+  --secondary-foreground: #27272a;
 
   /* Muted */
-  --muted: oklch(0.97 0.008 250);
-  --muted-foreground: oklch(0.45 0.02 250);
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
 
   /* Accent */
-  --accent: oklch(0.95 0.03 250);
-  --accent-foreground: oklch(0.25 0.08 250);
+  --accent: #e4e4e7;
+  --accent-foreground: #18181b;
 
   /* Semantic Colors */
-  --destructive: oklch(0.55 0.22 25);
-  --success: oklch(0.55 0.18 145);
-  --warning: oklch(0.75 0.15 70);
-  --info: oklch(0.55 0.18 250);
+  --destructive: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 
   /* Borders & Inputs */
-  --border: oklch(0.92 0.015 250);
-  --input: oklch(0.94 0.012 250);
-  --ring: oklch(0.52 0.18 250);
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
 
   /* Chart Colors */
-  --chart-1: oklch(0.52 0.18 250);
-  --chart-2: oklch(0.55 0.18 145);
-  --chart-3: oklch(0.6 0.15 200);
-  --chart-4: oklch(0.7 0.12 280);
-  --chart-5: oklch(0.75 0.15 70);
+  --chart-1: #18181b;
+  --chart-2: #10b981;
+  --chart-3: #3b82f6;
+  --chart-4: #8b5cf6;
+  --chart-5: #f59e0b;
 
   /* Sidebar */
-  --sidebar: oklch(0.99 0.005 250);
-  --sidebar-foreground: oklch(0.15 0.02 250);
-  --sidebar-primary: oklch(0.52 0.18 250);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.96 0.025 250);
-  --sidebar-accent-foreground: oklch(0.25 0.04 250);
-  --sidebar-border: oklch(0.94 0.012 250);
-  --sidebar-ring: oklch(0.52 0.18 250);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #71717a;
+  --sidebar-primary: #18181b;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #18181b;
 }
 
 /* =============================================================================
-   Dark Theme
-   Sophisticated Dark Mode with Blue Accents
+   Dark Theme - Carbon Zinc 950 Design
    ============================================================================= */
 
 .dark {
-  /* True Black Background */
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.98 0 0);
+  /* Zinc 950 Background */
+  --background: #09090b;
+  --foreground: #e4e4e7;
 
-  /* Glassmorphism Cards - semi-transparent with blur */
-  --card: oklch(0.12 0.01 250 / 0.6);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.1 0.01 250 / 0.85);
-  --popover-foreground: oklch(0.98 0 0);
+  /* Semi-transparent Cards */
+  --card: rgba(24, 24, 27, 0.6);
+  --card-foreground: #e4e4e7;
+  --popover: rgba(24, 24, 27, 0.95);
+  --popover-foreground: #e4e4e7;
 
-  /* Primary Blue - vibrant for dark mode */
-  --primary: oklch(0.68 0.2 250);
-  --primary-foreground: oklch(0 0 0);
+  /* Primary - White */
+  --primary: #ffffff;
+  --primary-foreground: #09090b;
 
-  /* Secondary - glass effect */
-  --secondary: oklch(0.2 0.015 250 / 0.5);
-  --secondary-foreground: oklch(0.95 0 0);
+  /* Secondary */
+  --secondary: rgba(39, 39, 42, 0.5);
+  --secondary-foreground: #e4e4e7;
 
-  /* Muted - subtle glass */
-  --muted: oklch(0.18 0.01 250 / 0.4);
-  --muted-foreground: oklch(0.6 0.01 250);
+  /* Muted */
+  --muted: rgba(39, 39, 42, 0.4);
+  --muted-foreground: #71717a;
 
-  /* Accent - glass highlight */
-  --accent: oklch(0.25 0.02 250 / 0.5);
-  --accent-foreground: oklch(0.95 0 0);
+  /* Accent */
+  --accent: rgba(39, 39, 42, 0.6);
+  --accent-foreground: #e4e4e7;
 
-  /* Semantic Colors - vibrant for visibility */
-  --destructive: oklch(0.65 0.22 20);
-  --success: oklch(0.65 0.2 145);
-  --warning: oklch(0.78 0.18 70);
-  --info: oklch(0.68 0.2 250);
+  /* Semantic Colors - Vibrant */
+  --destructive: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --info: #60a5fa;
 
-  /* Borders - visible but subtle glass */
-  --border: oklch(0.3 0.02 250 / 0.4);
-  --input: oklch(0.15 0.01 250 / 0.7);
-  --ring: oklch(0.68 0.2 250);
+  /* Borders - Subtle */
+  --border: rgba(255, 255, 255, 0.05);
+  --input: rgba(39, 39, 42, 0.8);
+  --ring: #ffffff;
 
-  /* Charts - vibrant */
-  --chart-1: oklch(0.68 0.2 250);
-  --chart-2: oklch(0.65 0.2 145);
-  --chart-3: oklch(0.7 0.18 200);
-  --chart-4: oklch(0.72 0.18 280);
-  --chart-5: oklch(0.78 0.18 70);
+  /* Charts */
+  --chart-1: #ffffff;
+  --chart-2: #34d399;
+  --chart-3: #60a5fa;
+  --chart-4: #a78bfa;
+  --chart-5: #fbbf24;
 
-  /* Sidebar - glass effect */
-  --sidebar: oklch(0.06 0.01 250 / 0.85);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.68 0.2 250);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.2 0.015 250 / 0.5);
-  --sidebar-accent-foreground: oklch(0.95 0 0);
-  --sidebar-border: oklch(0.25 0.015 250 / 0.4);
-  --sidebar-ring: oklch(0.68 0.2 250);
+  /* Sidebar */
+  --sidebar: #09090b;
+  --sidebar-foreground: #71717a;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #09090b;
+  --sidebar-accent: rgba(39, 39, 42, 0.5);
+  --sidebar-accent-foreground: #e4e4e7;
+  --sidebar-border: rgba(255, 255, 255, 0.05);
+  --sidebar-ring: #ffffff;
 }
 
 /* =============================================================================
@@ -188,20 +186,22 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   }
 
-  /* Typography Scale */
+  /* Typography Scale - Carbon Style */
   h1 {
-    @apply text-3xl font-bold tracking-tight;
-    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    @apply text-4xl font-light tracking-tight;
+    letter-spacing: -0.03em;
   }
   h2 {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply text-3xl font-semibold;
+    letter-spacing: -0.02em;
   }
   h3 {
-    @apply text-xl font-semibold;
+    @apply text-xl font-medium;
+    letter-spacing: -0.01em;
   }
   h4 {
     @apply text-lg font-medium;
@@ -212,91 +212,188 @@
     @apply outline-2 outline-offset-2 outline-ring;
   }
 
-  /* Selection */
+  /* Selection - Carbon Style */
   ::selection {
-    @apply bg-primary/30 text-foreground;
+    @apply bg-primary text-primary-foreground;
   }
 }
 
 /* =============================================================================
-   Component Enhancements
+   Noise Texture Overlay
+   ============================================================================= */
+
+.noise-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* =============================================================================
+   Spotlight Card Effect
    ============================================================================= */
 
 @layer components {
-  /* Glassmorphism Card */
-  .glass-card {
-    @apply backdrop-blur-xl border border-white/10 shadow-xl;
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
+  .spotlight-card {
+    @apply relative overflow-hidden transition-all duration-300 rounded-2xl;
+    background-color: var(--card);
+    border: 1px solid var(--border);
   }
 
-  .dark .glass-card {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.02) 100%
+  .spotlight-card::before {
+    content: "";
+    position: absolute;
+    background: radial-gradient(
+      800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
     );
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+
+  .spotlight-card:hover {
     border-color: rgba(255, 255, 255, 0.1);
   }
 
-  /* Premium Card Hover Effects */
+  .spotlight-card > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Nav Link Styling */
+  .nav-link {
+    @apply relative transition-colors duration-300 flex items-center gap-4 px-4 py-3 rounded-lg;
+    color: var(--muted-foreground);
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--foreground);
+  }
+
+  .nav-link.active::after {
+    content: "";
+    position: absolute;
+    right: -1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: var(--primary);
+    border-radius: 2px 0 0 2px;
+  }
+
+  [dir="rtl"] .nav-link.active::after {
+    right: auto;
+    left: -1.5rem;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .dark .nav-link.active::after {
+    box-shadow: -4px 0 15px rgba(255, 255, 255, 0.5);
+  }
+
+  /* Tracking Tight Custom */
+  .tracking-tight-custom {
+    letter-spacing: -0.03em;
+  }
+
+  /* Premium Card Effects */
   .card-hover {
     @apply transition-all duration-300 ease-out;
   }
 
   .card-hover:hover {
-    @apply shadow-xl -translate-y-1;
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+    @apply -translate-y-1;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
   }
 
   .dark .card-hover:hover {
     box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-
-  /* Gradient Text */
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent;
+      0 0 0 1px rgba(255, 255, 255, 0.08);
   }
 
   /* Glass Effect */
   .glass {
-    @apply backdrop-blur-xl border border-white/10;
+    @apply backdrop-blur-xl;
     background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .dark .glass {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
   }
 
   /* Glassmorphism Table */
   .glass-table {
-    @apply backdrop-blur-lg rounded-lg overflow-hidden;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
+    @apply backdrop-blur-lg rounded-xl overflow-hidden;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
   }
 
-  .dark .glass-table {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.02) 100%
-    );
+  /* Metal Shine Animation */
+  @keyframes shine {
+    100% {
+      left: 125%;
+    }
   }
 
-  /* Subtle Glow */
-  .glow {
-    box-shadow: 0 0 40px -10px oklch(0.52 0.18 250 / 0.3);
+  .animate-shine {
+    animation: shine 0.5s ease-in-out;
   }
 
-  .dark .glow {
-    box-shadow: 0 0 60px -15px oklch(0.68 0.2 250 / 0.25);
+  /* Chart Line Animation */
+  .chart-line {
+    stroke-dasharray: 2000;
+    stroke-dashoffset: 2000;
+  }
+
+  .chart-line-animate {
+    animation: drawLine 2s ease-in-out forwards;
+  }
+
+  @keyframes drawLine {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Glow Effects */
+  .glow-white {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Transaction Item */
+  .transaction-item {
+    @apply flex items-center justify-between p-4 hover:bg-white/5 transition-colors cursor-pointer;
+  }
+
+  .transaction-item:hover .transaction-icon {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .transaction-icon {
+    @apply w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground transition-colors;
   }
 }
 
@@ -305,7 +402,7 @@
    ============================================================================= */
 
 @layer utilities {
-  /* Mobile-First Spacing */
+  /* Container Padding */
   .container-padding {
     @apply px-4 py-4 sm:px-6 sm:py-6 lg:px-8;
   }
@@ -318,9 +415,15 @@
     @apply p-4 sm:p-6;
   }
 
+  /* Page Content */
+  .page-content {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+
   /* Mobile-Optimized Typography */
   .heading-primary {
-    @apply text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight;
+    @apply text-2xl sm:text-3xl lg:text-4xl font-light;
+    letter-spacing: -0.03em;
   }
 
   .heading-secondary {
@@ -331,14 +434,9 @@
     @apply text-sm sm:text-base;
   }
 
-  /* Mobile Grid Utilities */
+  /* Stats Grid */
   .stats-grid {
     @apply grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4;
-  }
-
-  /* Page Content Padding */
-  .page-content {
-    @apply p-4 sm:p-6 lg:p-8;
   }
 
   /* Urdu/Arabic Font - Premium Nastaliq */
@@ -351,16 +449,16 @@
 
   /* English Premium Font */
   .font-english {
-    font-family: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    font-family: "Manrope", "Inter", system-ui, sans-serif;
     letter-spacing: -0.01em;
   }
 
-  /* Smooth Number Transitions */
+  /* Tabular Numbers */
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Hide scrollbar but keep functionality */
+  /* Hide scrollbar */
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -370,10 +468,10 @@
     display: none;
   }
 
-  /* Custom scrollbar - dark mode optimized */
+  /* Custom scrollbar - Carbon style */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -386,23 +484,23 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.25);
   }
 
   /* Animation Utilities */
   .animate-in {
-    animation: animate-in 0.2s ease-out;
+    animation: animate-in 0.4s ease-out;
   }
 
   @keyframes animate-in {
     from {
       opacity: 0;
-      transform: translateY(4px);
+      transform: translateY(8px);
     }
     to {
       opacity: 1;
@@ -410,19 +508,85 @@
     }
   }
 
-  /* Skeleton pulse animation override for smoother effect */
-  .animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  .animate-in-left {
+    animation: animate-in-left 0.6s ease-out forwards;
+    opacity: 0;
   }
 
-  @keyframes pulse {
-    0%,
-    100% {
+  @keyframes animate-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
       opacity: 1;
+      transform: translateX(0);
     }
-    50% {
-      opacity: 0.5;
+  }
+
+  .animate-in-right {
+    animation: animate-in-right 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes animate-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
     }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-in-up {
+    animation: animate-in-up 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes animate-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-in-down {
+    animation: animate-in-down 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  @keyframes animate-in-down {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stagger delays */
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+  .delay-500 {
+    animation-delay: 500ms;
   }
 
   /* iOS Safe Area Support */
@@ -447,6 +611,93 @@
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
   }
+
+  /* =============================================================================
+     Theme-Aware Utility Classes for Light/Dark Mode
+     ============================================================================= */
+
+  /* Surface colors for cards/containers */
+  .surface-primary {
+    @apply bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-white/5;
+  }
+
+  .surface-secondary {
+    @apply bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/50;
+  }
+
+  .surface-muted {
+    @apply bg-zinc-100 dark:bg-zinc-800/30 border-zinc-200 dark:border-zinc-700/30;
+  }
+
+  /* Text colors */
+  .text-primary-theme {
+    @apply text-zinc-900 dark:text-white;
+  }
+
+  .text-secondary-theme {
+    @apply text-zinc-700 dark:text-zinc-300;
+  }
+
+  .text-muted-theme {
+    @apply text-zinc-500 dark:text-zinc-400;
+  }
+
+  /* Input/Form styling */
+  .input-theme {
+    @apply bg-white dark:bg-zinc-800/50 border-zinc-300 dark:border-zinc-700/50 
+           text-zinc-900 dark:text-white placeholder:text-zinc-400 dark:placeholder:text-zinc-500
+           focus:ring-zinc-400 dark:focus:ring-white/20;
+  }
+
+  /* Table styling */
+  .table-header-theme {
+    @apply bg-zinc-100 dark:bg-zinc-800/30 border-zinc-200 dark:border-zinc-800;
+  }
+
+  .table-row-theme {
+    @apply border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800/30;
+  }
+
+  .table-cell-theme {
+    @apply text-zinc-700 dark:text-zinc-300;
+  }
+
+  /* Button variants */
+  .btn-primary-theme {
+    @apply bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 
+           hover:bg-zinc-800 dark:hover:bg-zinc-100;
+  }
+
+  .btn-secondary-theme {
+    @apply bg-zinc-100 dark:bg-zinc-800/50 border-zinc-300 dark:border-zinc-700/50 
+           text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700/50;
+  }
+
+  /* Badge/Tag styling */
+  .badge-theme {
+    @apply bg-zinc-100 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 
+           text-zinc-700 dark:text-zinc-300;
+  }
+
+  /* Dropdown/Select styling */
+  .dropdown-theme {
+    @apply bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 
+           text-zinc-900 dark:text-zinc-100;
+  }
+}
+
+/* =============================================================================
+   RTL Support
+   ============================================================================= */
+
+[dir="rtl"] {
+  .animate-in-left {
+    animation-name: animate-in-right;
+  }
+
+  .animate-in-right {
+    animation-name: animate-in-left;
+  }
 }
 
 /* =============================================================================
@@ -467,7 +718,6 @@
     display: block !important;
   }
 
-  /* Ensure tables print nicely */
   table {
     border-collapse: collapse;
   }
@@ -476,5 +726,9 @@
   td {
     border: 1px solid #ddd;
     padding: 8px;
+  }
+
+  .noise-overlay {
+    display: none !important;
   }
 }

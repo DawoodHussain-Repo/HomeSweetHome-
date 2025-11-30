@@ -33,23 +33,28 @@ export function UserMenu({ user }: UserMenuProps) {
     "U";
 
   return (
-    <div className="p-4 border-t border-border">
+    <div className="px-6 py-4 animate-in-left delay-300">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 h-auto py-3"
-          >
+          <div className="flex items-center gap-3 p-2 rounded-lg border border-border bg-card hover:bg-accent transition-colors cursor-pointer">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/10 text-primary">
+              <AvatarFallback className="bg-gradient-to-br from-zinc-500 to-zinc-700 text-white">
                 {initials}
               </AvatarFallback>
             </Avatar>
-            <span className="flex-1 text-left truncate text-sm font-medium">
-              {user?.name || user?.email || "User"}
-            </span>
-            <ChevronDown size={16} className="text-muted-foreground" />
-          </Button>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-foreground truncate">
+                {user?.name || "User"}
+              </div>
+              <div className="text-[10px] text-muted-foreground truncate">
+                {user?.email || "Premium Plan"}
+              </div>
+            </div>
+            <ChevronDown
+              size={14}
+              className="text-muted-foreground flex-shrink-0"
+            />
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuItem

@@ -139,15 +139,15 @@ export default function AccountsPage() {
     return (
       <div key={account.id}>
         <div
-          className={`flex items-center gap-2 px-4 py-3 hover:bg-white/5 border-b border-white/5 transition-colors ${
-            account.is_header ? "glass" : ""
+          className={`flex items-center gap-2 px-4 py-3 hover:bg-secondary/30 border-b border-border transition-colors ${
+            account.is_header ? "bg-secondary/20" : ""
           }`}
           style={{ paddingLeft: `${level * 24 + 16}px` }}
         >
           {/* Expand/Collapse Button */}
           <button
             onClick={() => toggleExpand(account.id)}
-            className={`w-6 h-6 flex items-center justify-center rounded hover:bg-white/10 text-muted-foreground ${
+            className={`w-6 h-6 flex items-center justify-center rounded hover:bg-secondary text-muted-foreground ${
               !hasChildren ? "invisible" : ""
             }`}
           >
@@ -160,7 +160,7 @@ export default function AccountsPage() {
 
           {/* Icon */}
           {account.is_header ? (
-            <FolderOpen size={18} className="text-amber-400" />
+            <FolderOpen size={18} className="text-amber-500" />
           ) : (
             <FileText size={18} className="text-muted-foreground" />
           )}
@@ -203,13 +203,13 @@ export default function AccountsPage() {
           <div className="flex items-center gap-1 ml-4">
             <Link
               href={`/dashboard/accounts/${account.id}/edit`}
-              className="p-2 text-muted-foreground hover:text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:text-blue-500 hover:bg-blue-500/20 rounded-lg transition-colors"
             >
               <Edit2 size={16} />
             </Link>
             <button
               onClick={() => handleDelete(account.id)}
-              className="p-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-500/20 rounded-lg transition-colors"
             >
               <Trash2 size={16} />
             </button>
@@ -231,7 +231,7 @@ export default function AccountsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight-custom">
             {t("accounts.title")}
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -240,7 +240,7 @@ export default function AccountsPage() {
         </div>
         <Link
           href="/dashboard/accounts/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-all"
         >
           <Plus size={20} />
           {t("accounts.addNew")}
@@ -248,7 +248,7 @@ export default function AccountsPage() {
       </div>
 
       {/* Filters */}
-      <div className="glass-card rounded-xl p-4">
+      <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border border-border p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="relative flex-1">
@@ -261,7 +261,7 @@ export default function AccountsPage() {
               placeholder={`${t("common.search")}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
+              className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -269,7 +269,7 @@ export default function AccountsPage() {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground"
+            className="px-4 py-2 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="all">All Types</option>
             <option value="asset">{t("accounts.asset")}</option>
@@ -283,13 +283,13 @@ export default function AccountsPage() {
           <div className="flex gap-2">
             <button
               onClick={expandAll}
-              className="px-3 py-2 text-muted-foreground hover:text-foreground glass rounded-lg transition-colors"
+              className="px-3 py-2 text-muted-foreground hover:text-foreground bg-secondary/30 hover:bg-secondary/50 rounded-xl transition-colors"
             >
               Expand All
             </button>
             <button
               onClick={collapseAll}
-              className="px-3 py-2 text-muted-foreground hover:text-foreground glass rounded-lg transition-colors"
+              className="px-3 py-2 text-muted-foreground hover:text-foreground bg-secondary/30 hover:bg-secondary/50 rounded-xl transition-colors"
             >
               Collapse All
             </button>
@@ -298,9 +298,9 @@ export default function AccountsPage() {
       </div>
 
       {/* Accounts Table */}
-      <div className="glass-card rounded-xl overflow-hidden">
+      <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border border-border overflow-hidden">
         {/* Table Header */}
-        <div className="flex items-center gap-2 px-4 py-3 glass border-b border-white/10 font-medium text-muted-foreground text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 bg-secondary/30 border-b border-border font-medium text-muted-foreground text-sm">
           <div className="w-6" /> {/* Expand button space */}
           <div className="w-5" /> {/* Icon space */}
           <div className="w-28">{t("accounts.code")}</div>
@@ -312,11 +312,11 @@ export default function AccountsPage() {
 
         {/* Table Body */}
         {loading ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-muted-foreground">
             {t("common.loading")}
           </div>
         ) : accountTree.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-muted-foreground">
             {t("common.noData")}
           </div>
         ) : (
@@ -329,7 +329,10 @@ export default function AccountsPage() {
         {["asset", "liability", "equity", "income", "expense"].map((type) => {
           const count = accounts.filter((a) => a.account_type === type).length;
           return (
-            <div key={type} className="glass-card rounded-lg p-4">
+            <div
+              key={type}
+              className="spotlight-card bg-card backdrop-blur-xl rounded-xl border border-border p-4"
+            >
               <span
                 className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(
                   type

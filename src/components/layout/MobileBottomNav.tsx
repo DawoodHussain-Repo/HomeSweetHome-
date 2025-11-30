@@ -64,7 +64,7 @@ export function MobileBottomNav() {
   };
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-card border-t border-white/10 safe-area-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/80 backdrop-blur-xl border-t border-white/5 safe-area-bottom">
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -77,15 +77,14 @@ export function MobileBottomNav() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center flex-1 h-full py-1 px-1 rounded-xl transition-all duration-200",
-                active
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                active ? "text-white" : "text-zinc-500 hover:text-zinc-300"
               )}
             >
               <div
                 className={cn(
                   "flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200",
-                  active && "bg-primary/20"
+                  active &&
+                    "bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.2)]"
                 )}
               >
                 <Icon

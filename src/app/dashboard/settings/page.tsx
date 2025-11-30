@@ -81,7 +81,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -90,7 +90,7 @@ export default function SettingsPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight-custom">
           {t("nav.settings")}
         </h1>
         <p className="text-muted-foreground mt-1">
@@ -101,10 +101,10 @@ export default function SettingsPage() {
       {/* Message */}
       {message && (
         <div
-          className={`p-4 rounded-lg glass ${
+          className={`p-4 rounded-xl backdrop-blur-sm ${
             message.type === "success"
-              ? "text-green-400 border border-green-500/30"
-              : "text-red-400 border border-red-500/30"
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+              : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
           }`}
         >
           {message.text}
@@ -112,10 +112,10 @@ export default function SettingsPage() {
       )}
 
       {/* Company Information */}
-      <div className="glass-card rounded-xl p-6">
+      <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-blue-500/20 rounded-lg">
-            <Building2 className="w-5 h-5 text-blue-400" />
+            <Building2 className="w-5 h-5 text-blue-500" />
           </div>
           <h2 className="text-lg font-semibold text-foreground">
             Company Information
@@ -133,7 +133,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 setCompanyInfo({ ...companyInfo, company_name: e.target.value })
               }
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
               placeholder="Your Company Name"
             />
           </div>
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                   company_name_urdu: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground font-urdu"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 font-urdu"
               placeholder="کمپنی کا نام"
             />
           </div>
@@ -165,7 +165,7 @@ export default function SettingsPage() {
                 setCompanyInfo({ ...companyInfo, address: e.target.value })
               }
               rows={2}
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
               placeholder="Company Address"
             />
           </div>
@@ -182,7 +182,7 @@ export default function SettingsPage() {
                   phone_numbers: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
               placeholder="+92 XXX XXXXXXX"
             />
           </div>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
               onChange={(e) =>
                 setCompanyInfo({ ...companyInfo, email: e.target.value })
               }
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground placeholder:text-muted-foreground"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
               placeholder="contact@company.com"
             />
           </div>
@@ -213,7 +213,7 @@ export default function SettingsPage() {
                   fiscal_year_start: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
             />
           </div>
           <div>
@@ -229,17 +229,17 @@ export default function SettingsPage() {
                   fiscal_year_end: e.target.value,
                 })
               }
-              className="w-full px-4 py-2 glass border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-foreground"
+              className="w-full px-4 py-2.5 bg-background border border-input rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
             />
           </div>
         </div>
       </div>
 
       {/* Language Settings */}
-      <div className="glass-card rounded-xl p-6">
+      <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-purple-500/20 rounded-lg">
-            <Globe className="w-5 h-5 text-purple-400" />
+            <Globe className="w-5 h-5 text-purple-500" />
           </div>
           <h2 className="text-lg font-semibold text-foreground">
             Language & Display
@@ -254,10 +254,10 @@ export default function SettingsPage() {
             <div className="flex gap-4">
               <button
                 onClick={() => setLanguage("en")}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
                   language === "en"
-                    ? "border-primary bg-primary/20 text-primary"
-                    : "border-white/10 glass hover:border-primary/50"
+                    ? "border-primary bg-primary/10 text-foreground shadow-sm"
+                    : "border-border bg-muted/30 text-muted-foreground hover:border-muted-foreground/50"
                 }`}
               >
                 <div className="font-medium">English</div>
@@ -267,10 +267,10 @@ export default function SettingsPage() {
               </button>
               <button
                 onClick={() => setLanguage("ur")}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 transition-colors ${
+                className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
                   language === "ur"
-                    ? "border-primary bg-primary/20 text-primary"
-                    : "border-white/10 glass hover:border-primary/50"
+                    ? "border-primary bg-primary/10 text-foreground shadow-sm"
+                    : "border-border bg-muted/30 text-muted-foreground hover:border-muted-foreground/50"
                 }`}
               >
                 <div className="font-medium font-urdu">اردو</div>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium rounded-lg transition-colors"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium rounded-xl transition-all"
         >
           {saving ? (
             <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />

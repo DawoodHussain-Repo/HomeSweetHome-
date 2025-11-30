@@ -204,15 +204,15 @@ export default function NewVoucherPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/vouchers"
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
         >
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
             {t("vouchers.new")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground text-sm sm:text-base">
             Create a new transaction voucher
           </p>
         </div>
@@ -221,20 +221,20 @@ export default function NewVoucherPage() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
 
         {/* Voucher Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-border">
+          <h2 className="text-base sm:text-lg font-semibold text-foreground mb-4">
             Voucher Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Voucher Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-foreground/80 mb-1">
                 {t("vouchers.type")} *
               </label>
               <select
@@ -243,7 +243,7 @@ export default function NewVoucherPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, voucher_type_id: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
               >
                 <option value="">Select Type</option>
                 {voucherTypes.map((vt) => (
@@ -256,7 +256,7 @@ export default function NewVoucherPage() {
 
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">
                 {t("vouchers.date")} *
               </label>
               <input
@@ -266,13 +266,13 @@ export default function NewVoucherPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, transaction_date: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
               />
             </div>
 
             {/* Voucher Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">
                 Voucher No.
               </label>
               <input
@@ -281,14 +281,14 @@ export default function NewVoucherPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, voucher_number: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
                 placeholder="Auto-generated if empty"
               />
             </div>
 
             {/* Cheque Number */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">
                 Cheque No.
               </label>
               <input
@@ -297,13 +297,13 @@ export default function NewVoucherPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, cheque_number: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
               />
             </div>
 
             {/* Cheque Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">
                 Cheque Date
               </label>
               <input
@@ -312,13 +312,13 @@ export default function NewVoucherPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, cheque_date: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
               />
             </div>
 
             {/* Narration */}
             <div className="md:col-span-3">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">
                 {t("vouchers.narration")}
               </label>
               <input
@@ -327,7 +327,7 @@ export default function NewVoucherPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, narration: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
                 placeholder="Transaction description..."
               />
             </div>
@@ -335,15 +335,15 @@ export default function NewVoucherPage() {
         </div>
 
         {/* Voucher Lines */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-foreground">
               Transaction Entries
             </h2>
             <button
               type="button"
               onClick={addLine}
-              className="flex items-center gap-1 px-3 py-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
+              className="flex items-center gap-1 px-3 py-1 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
             >
               <Plus size={18} />
               Add Line
@@ -351,7 +351,7 @@ export default function NewVoucherPage() {
           </div>
 
           {/* Lines Header */}
-          <div className="grid grid-cols-12 gap-2 mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          <div className="grid grid-cols-12 gap-2 mb-2 text-sm font-medium text-muted-foreground">
             <div className="col-span-5">Account</div>
             <div className="col-span-3">Description</div>
             <div className="col-span-2 text-right">{t("vouchers.debit")}</div>
@@ -368,7 +368,7 @@ export default function NewVoucherPage() {
                     onChange={(e) =>
                       updateLine(index, "account_id", e.target.value)
                     }
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
                   >
                     <option value="">Select Account</option>
                     {accounts.map((acc) => (
@@ -385,7 +385,7 @@ export default function NewVoucherPage() {
                     onChange={(e) =>
                       updateLine(index, "description", e.target.value)
                     }
-                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
                     placeholder="Details..."
                   />
                 </div>
@@ -402,7 +402,7 @@ export default function NewVoucherPage() {
                         parseFloat(e.target.value) || 0
                       )
                     }
-                    className="w-full px-3 py-2 text-sm text-right border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full px-3 py-2 text-sm text-right border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
                     placeholder="0.00"
                   />
                 </div>
@@ -419,7 +419,7 @@ export default function NewVoucherPage() {
                         parseFloat(e.target.value) || 0
                       )
                     }
-                    className="w-full px-3 py-2 text-sm text-right border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+                    className="w-full px-3 py-2 text-sm text-right border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground"
                     placeholder="0.00"
                   />
                 </div>
@@ -428,7 +428,7 @@ export default function NewVoucherPage() {
                     type="button"
                     onClick={() => removeLine(index)}
                     disabled={lines.length <= 2}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -438,14 +438,14 @@ export default function NewVoucherPage() {
           </div>
 
           {/* Totals */}
-          <div className="grid grid-cols-12 gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="col-span-8 text-right font-semibold text-gray-900 dark:text-white">
+          <div className="grid grid-cols-12 gap-2 mt-4 pt-4 border-t border-border">
+            <div className="col-span-8 text-right font-semibold text-foreground">
               {t("vouchers.total")}:
             </div>
-            <div className="col-span-2 text-right font-bold text-gray-900 dark:text-white">
+            <div className="col-span-2 text-right font-bold text-foreground">
               Rs. {totalDebit.toLocaleString()}
             </div>
-            <div className="col-span-2 text-right font-bold text-gray-900 dark:text-white">
+            <div className="col-span-2 text-right font-bold text-foreground">
               Rs. {totalCredit.toLocaleString()}
             </div>
           </div>
@@ -480,7 +480,7 @@ export default function NewVoucherPage() {
           </button>
           <Link
             href="/dashboard/vouchers"
-            className="px-6 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium rounded-lg transition-colors"
+            className="px-6 py-2 text-muted-foreground hover:bg-secondary font-medium rounded-lg transition-colors"
           >
             {t("common.cancel")}
           </Link>

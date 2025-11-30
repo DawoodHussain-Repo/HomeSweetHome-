@@ -6,17 +6,12 @@ export function SidebarLogo() {
   const { language } = useLanguage();
 
   return (
-    <div className="p-6 border-b border-border">
+    <div className="px-8 py-6 mb-8 animate-in-left">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-          <span className="text-xl">📒</span>
-        </div>
-        <div>
-          <h1 className="font-bold text-foreground">
-            {language === "ur" ? "حساب کتاب" : "Hisaab Kitaab"}
-          </h1>
-          <p className="text-xs text-muted-foreground">Accounting System</p>
-        </div>
+        <div className="w-6 h-6 bg-primary rounded-full shadow-[0_0_15px_rgba(255,255,255,0.3)] dark:shadow-[0_0_15px_rgba(255,255,255,0.3)]" />
+        <span className="font-bold text-xl tracking-tight-custom text-foreground">
+          {language === "ur" ? "حساب کتاب" : "Hisaab"}
+        </span>
       </div>
     </div>
   );

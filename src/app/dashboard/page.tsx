@@ -4,111 +4,86 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { useDashboard } from "@/hooks";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSpotlightEffect } from "@/components/ui/spotlight-card";
 import { format } from "date-fns";
 import {
   BookOpen,
   FileText,
   TrendingUp,
   TrendingDown,
-  Wallet,
   Plus,
   ArrowUpRight,
   ArrowDownRight,
-  Calendar,
   BarChart3,
-  PieChart,
   Activity,
   RefreshCw,
+  Bell,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Voucher type mapping
 const VOUCHER_TYPE_MAP: Record<
   number,
-  { name: string; isReceipt: boolean; isPayment: boolean }
+  { name: string; nameUrdu: string; isReceipt: boolean; isPayment: boolean }
 > = {
-  101: { name: "Cash Receipt", isReceipt: true, isPayment: false },
-  102: { name: "Cash Payment", isReceipt: false, isPayment: true },
-  201: { name: "Journal Entry", isReceipt: false, isPayment: false },
-  301: { name: "Opening Balance", isReceipt: false, isPayment: false },
+  101: {
+    name: "Cash Receipt",
+    nameUrdu: "نقد وصولی",
+    isReceipt: true,
+    isPayment: false,
+  },
+  102: {
+    name: "Cash Payment",
+    nameUrdu: "نقد ادائیگی",
+    isReceipt: false,
+    isPayment: true,
+  },
+  201: {
+    name: "Journal Entry",
+    nameUrdu: "جنرل اندراج",
+    isReceipt: false,
+    isPayment: false,
+  },
+  301: {
+    name: "Opening Balance",
+    nameUrdu: "اوپننگ بیلنس",
+    isReceipt: false,
+    isPayment: false,
+  },
 };
 
 // Loading skeleton component
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header Skeleton */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex justify-between items-end">
         <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64 mt-2" />
+          <Skeleton className="h-10 w-48 mb-2" />
+          <Skeleton className="h-14 w-72" />
         </div>
-        <Skeleton className="h-10 w-32" />
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <Skeleton className="h-10 w-28 rounded-full" />
+        </div>
       </div>
 
-      {/* Stats Cards Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-8 w-16" />
-                </div>
-                <Skeleton className="h-12 w-12 rounded-full" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Chart and Quick Actions Skeleton */}
+      {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-64 w-full" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full" />
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Transactions Skeleton */}
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-48" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
+        <div className="lg:col-span-2 space-y-6">
+          <Skeleton className="h-80 rounded-2xl" />
+          <div className="grid grid-cols-2 gap-6">
+            <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-56 rounded-2xl" />
+          <Skeleton className="h-80 rounded-2xl" />
+        </div>
+      </div>
     </div>
   );
 }
@@ -116,10 +91,15 @@ function DashboardSkeleton() {
 export default function DashboardPage() {
   const { stats, monthlyData, recentTransactions, isLoading, error, refetch } =
     useDashboard();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Enable spotlight effect on cards
+  useSpotlightEffect();
 
   const getVoucherTypeName = (code: number): string => {
-    return VOUCHER_TYPE_MAP[code]?.name || `Voucher ${code}`;
+    const type = VOUCHER_TYPE_MAP[code];
+    if (!type) return `Voucher ${code}`;
+    return language === "ur" ? type.nameUrdu : type.name;
   };
 
   const formatCurrency = (amount: number): string => {
@@ -127,6 +107,14 @@ export default function DashboardPage() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     })}`;
+  };
+
+  const formatCurrencyCompact = (amount: number): string => {
+    const abs = Math.abs(amount);
+    if (abs >= 10000000) return `${(abs / 10000000).toFixed(1)}Cr`;
+    if (abs >= 100000) return `${(abs / 100000).toFixed(1)}L`;
+    if (abs >= 1000) return `${(abs / 1000).toFixed(0)}K`;
+    return abs.toLocaleString("en-PK");
   };
 
   // Calculate max for chart scaling
@@ -146,493 +134,383 @@ export default function DashboardPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div className="text-center">
           <p className="text-destructive font-medium mb-2">
-            Error loading dashboard
+            {language === "ur"
+              ? "ڈیش بورڈ لوڈ کرنے میں خرابی"
+              : "Error loading dashboard"}
           </p>
           <p className="text-muted-foreground text-sm">{error}</p>
         </div>
-        <Button onClick={refetch} variant="outline">
+        <Button onClick={refetch} variant="outline" className="rounded-full">
           <RefreshCw className="h-4 w-4 mr-2" />
-          Try Again
+          {language === "ur" ? "دوبارہ کوشش کریں" : "Try Again"}
         </Button>
       </div>
     );
   }
 
+  const netBalance = stats.monthlyIncome - stats.monthlyExpense;
+  const netPercentage =
+    stats.monthlyIncome > 0
+      ? ((netBalance / stats.monthlyIncome) * 100).toFixed(1)
+      : "0";
+
   return (
-    <div className="section-spacing">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+    <div className="space-y-8">
+      {/* Header - Carbon Style */}
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border pb-8 animate-in-down">
         <div>
-          <h1 className="heading-primary text-foreground">
-            {t("dashboard.welcome")} 👋
+          <h1 className="text-3xl sm:text-4xl font-light tracking-tight-custom text-foreground mb-1">
+            {language === "ur" ? "کل بیلنس" : "Total Balance"}
           </h1>
-          <p className="text-muted-foreground text-sm sm:text-base mt-1">
-            Here&apos;s your financial overview for{" "}
-            {format(new Date(), "MMMM yyyy")}
-          </p>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-4xl sm:text-5xl font-bold tracking-tight-custom">
+              Rs. {formatCurrencyCompact(stats.cashBalance)}
+            </span>
+            <span className="text-2xl sm:text-3xl text-muted-foreground font-light">
+              .00
+            </span>
+            <Badge
+              className={`ml-2 sm:ml-4 text-xs font-medium px-2 py-1 rounded-full ${
+                netBalance >= 0
+                  ? "bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20"
+                  : "bg-red-400/10 text-red-400 hover:bg-red-400/20"
+              }`}
+            >
+              {netBalance >= 0 ? "+" : ""}
+              {netPercentage}%
+            </Badge>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button asChild size="sm" className="sm:size-default">
+
+        <div className="flex gap-3 sm:gap-4">
+          <button className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-accent transition-colors">
+            <Bell className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <Button
+            asChild
+            className="px-4 sm:px-6 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-full hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+          >
             <Link href="/dashboard/vouchers">
-              <Plus className="h-4 w-4 mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">New</span> Voucher
+              <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">
+                {language === "ur" ? "نیا ووچر" : "New Voucher"}
+              </span>
+              <span className="sm:hidden">
+                {language === "ur" ? "نیا" : "New"}
+              </span>
             </Link>
           </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Stats Cards */}
-      <div className="stats-grid">
-        <Card className="card-hover glass-card">
-          <CardContent className="p-4 sm:pt-6 sm:px-6">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Total Accounts
-                </p>
-                <p className="text-xl sm:text-2xl font-bold tabular-nums">
-                  {stats.totalAccounts}
-                </p>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-blue-400" />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Charts */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Performance Chart */}
+          <div className="spotlight-card rounded-2xl p-4 sm:p-6 h-72 sm:h-80 relative animate-in-up">
+            <div className="flex justify-between items-center mb-4 relative z-10">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {language === "ur" ? "کارکردگی" : "Performance"}
+              </h3>
+              <div className="flex gap-2">
+                <button className="text-xs text-foreground bg-accent px-3 py-1 rounded-md">
+                  6M
+                </button>
+                <button className="text-xs text-muted-foreground hover:text-foreground px-3 py-1 transition-colors">
+                  1Y
+                </button>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="card-hover glass-card">
-          <CardContent className="p-4 sm:pt-6 sm:px-6">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Total Transactions
-                </p>
-                <p className="text-xl sm:text-2xl font-bold tabular-nums">
-                  {stats.totalTransactions.toLocaleString()}
-                </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                  {stats.thisMonthTransactions} this month
-                </p>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-purple-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="card-hover glass-card">
-          <CardContent className="p-4 sm:pt-6 sm:px-6">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Cash Balance
-                </p>
-                <p
-                  className={`text-xl sm:text-2xl font-bold tabular-nums ${
-                    stats.cashBalance >= 0 ? "text-green-400" : "text-red-400"
-                  }`}
-                >
-                  {formatCurrency(stats.cashBalance)}
-                </p>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-                <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-green-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="card-hover glass-card">
-          <CardContent className="p-4 sm:pt-6 sm:px-6">
-            <div className="flex items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                  Net This Month
-                </p>
-                <p
-                  className={`text-xl sm:text-2xl font-bold tabular-nums ${
-                    stats.monthlyIncome - stats.monthlyExpense >= 0
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {formatCurrency(stats.monthlyIncome - stats.monthlyExpense)}
-                </p>
-                <div className="flex gap-2 mt-0.5 text-[10px] sm:text-xs">
-                  <span className="text-green-400">
-                    ↑ {formatCurrency(stats.monthlyIncome)}
-                  </span>
-                  <span className="text-red-400">
-                    ↓ {formatCurrency(stats.monthlyExpense)}
-                  </span>
-                </div>
-              </div>
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0">
-                <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-orange-400" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts and Quick Actions Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        {/* Monthly Chart */}
-        <Card className="lg:col-span-2 glass-card">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="hidden sm:inline">Monthly Overview</span>
-              <span className="sm:hidden">Overview</span>
-              <span className="text-muted-foreground font-normal text-xs sm:text-sm">
-                (6 Months)
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
-            <div className="h-48 sm:h-64 flex items-end justify-around gap-1 sm:gap-2">
+            {/* Bar Chart */}
+            <div className="flex-1 h-44 sm:h-52 flex items-end justify-around gap-1 sm:gap-2">
               {monthlyData.map((m, idx) => (
                 <div key={idx} className="flex-1 flex flex-col items-center">
-                  <div className="w-full flex gap-0.5 sm:gap-1 justify-center items-end h-36 sm:h-48">
+                  <div className="w-full flex gap-0.5 sm:gap-1 justify-center items-end h-36 sm:h-44">
                     {/* Income Bar */}
                     <div
-                      className="w-3 sm:w-5 bg-green-500 rounded-t transition-all duration-500"
+                      className="w-3 sm:w-6 bg-emerald-500/80 rounded-t transition-all duration-700"
                       style={{
                         height: `${(m.income / maxMonthlyValue) * 100}%`,
                         minHeight: m.income > 0 ? "4px" : "0",
+                        animationDelay: `${idx * 100}ms`,
                       }}
-                      title={`Income: ${formatCurrency(m.income)}`}
+                      title={`${
+                        language === "ur" ? "آمدنی" : "Income"
+                      }: ${formatCurrency(m.income)}`}
                     />
                     {/* Expense Bar */}
                     <div
-                      className="w-3 sm:w-5 bg-red-500 rounded-t transition-all duration-500"
+                      className="w-3 sm:w-6 bg-red-500/80 rounded-t transition-all duration-700"
                       style={{
                         height: `${(m.expense / maxMonthlyValue) * 100}%`,
                         minHeight: m.expense > 0 ? "4px" : "0",
+                        animationDelay: `${idx * 100}ms`,
                       }}
-                      title={`Expense: ${formatCurrency(m.expense)}`}
+                      title={`${
+                        language === "ur" ? "اخراجات" : "Expense"
+                      }: ${formatCurrency(m.expense)}`}
                     />
                   </div>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 sm:mt-2">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
                     {m.month}
                   </p>
                 </div>
               ))}
             </div>
-            <div className="flex justify-center gap-4 sm:gap-6 mt-3 sm:mt-4">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded" />
-                <span className="text-xs sm:text-sm text-muted-foreground">
-                  Income
+          </div>
+
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 gap-4 sm:gap-6">
+            {/* Monthly Income */}
+            <div className="spotlight-card rounded-2xl p-4 sm:p-6 animate-in-up delay-100">
+              <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-3 sm:mb-4">
+                {language === "ur" ? "ماہانہ آمدنی" : "Monthly Income"}
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg sm:text-2xl font-bold text-emerald-400">
+                  {formatCurrency(stats.monthlyIncome)}
+                </span>
+                <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+              </div>
+              <div className="w-full bg-accent h-1.5 rounded-full overflow-hidden mt-3 sm:mt-4">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(
+                      (stats.monthlyIncome /
+                        (stats.monthlyIncome + stats.monthlyExpense || 1)) *
+                        100,
+                      100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Monthly Expense */}
+            <div className="spotlight-card rounded-2xl p-4 sm:p-6 animate-in-up delay-200">
+              <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-3 sm:mb-4">
+                {language === "ur" ? "ماہانہ اخراجات" : "Monthly Expense"}
+              </h3>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg sm:text-2xl font-bold text-red-400">
+                  {formatCurrency(stats.monthlyExpense)}
+                </span>
+                <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+              </div>
+              <div className="w-full bg-accent h-1.5 rounded-full overflow-hidden mt-3 sm:mt-4">
+                <div
+                  className="bg-red-500 h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(
+                      (stats.monthlyExpense /
+                        (stats.monthlyIncome + stats.monthlyExpense || 1)) *
+                        100,
+                      100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="spotlight-card rounded-2xl p-4 sm:p-6 animate-in-up delay-300">
+            <h3 className="text-sm font-medium text-muted-foreground mb-4">
+              {language === "ur" ? "فوری کارروائیاں" : "Quick Actions"}
+            </h3>
+            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 scrollbar-hide">
+              <Link
+                href="/dashboard/vouchers?type=receipt"
+                className="flex flex-col items-center gap-2 min-w-[60px] sm:min-w-[70px] cursor-pointer group"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/30 transition-all border border-transparent group-hover:border-emerald-500/50">
+                  <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
+                </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                  {language === "ur" ? "وصولی" : "Receipt"}
+                </span>
+              </Link>
+
+              <Link
+                href="/dashboard/vouchers?type=payment"
+                className="flex flex-col items-center gap-2 min-w-[60px] sm:min-w-[70px] cursor-pointer group"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition-all border border-transparent group-hover:border-red-500/50">
+                  <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
+                </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                  {language === "ur" ? "ادائیگی" : "Payment"}
+                </span>
+              </Link>
+
+              <Link
+                href="/dashboard/vouchers?type=journal"
+                className="flex flex-col items-center gap-2 min-w-[60px] sm:min-w-[70px] cursor-pointer group"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-all border border-transparent group-hover:border-blue-500/50">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
+                </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                  {language === "ur" ? "جنرل" : "Journal"}
+                </span>
+              </Link>
+
+              <Link
+                href="/dashboard/accounts"
+                className="flex flex-col items-center gap-2 min-w-[60px] sm:min-w-[70px] cursor-pointer group"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-all border border-transparent group-hover:border-purple-500/50">
+                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
+                </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                  {language === "ur" ? "اکاؤنٹس" : "Accounts"}
+                </span>
+              </Link>
+
+              <Link
+                href="/dashboard/reports"
+                className="flex flex-col items-center gap-2 min-w-[60px] sm:min-w-[70px] cursor-pointer group"
+              >
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-all border border-transparent group-hover:border-orange-500/50">
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />
+                </div>
+                <span className="text-[10px] sm:text-xs text-muted-foreground group-hover:text-foreground transition-colors">
+                  {language === "ur" ? "رپورٹس" : "Reports"}
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Stats Card */}
+          <div className="spotlight-card rounded-2xl p-1 relative h-44 sm:h-48 group animate-in-right">
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/50 to-black/50 rounded-2xl opacity-50" />
+
+            <div className="w-full h-full bg-card rounded-xl border border-border p-4 sm:p-6 flex flex-col justify-between relative overflow-hidden shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
+              {/* Metal Shine Effect */}
+              <div className="absolute top-0 -inset-full h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white opacity-5 group-hover:animate-shine" />
+
+              <div className="flex justify-between items-start">
+                <Activity className="w-5 h-5 sm:w-6 sm:h-6 opacity-50" />
+                <span className="font-bold tracking-widest text-foreground italic text-sm sm:text-base">
+                  {language === "ur" ? "حساب" : "Hisaab"}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded" />
-                <span className="text-xs sm:text-sm text-muted-foreground">
-                  Expense
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card className="glass-card">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <PieChart className="h-4 w-4 sm:h-5 sm:w-5" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 space-y-2 sm:space-y-3">
-            <Button
-              asChild
-              variant="outline"
-              className="w-full justify-start h-auto py-2.5 sm:py-3 glass border-white/10"
-            >
-              <Link href="/dashboard/vouchers?type=101">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-green-500/20 flex items-center justify-center mr-2 sm:mr-3">
-                  <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-sm sm:text-base">
-                    Cash Receipt
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground font-urdu">
-                    نقد وصولی
-                  </p>
-                </div>
-              </Link>
-            </Button>
-
-            <Button
-              asChild
-              variant="outline"
-              className="w-full justify-start h-auto py-2.5 sm:py-3 glass border-white/10"
-            >
-              <Link href="/dashboard/vouchers?type=102">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-red-500/20 flex items-center justify-center mr-2 sm:mr-3">
-                  <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-red-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-sm sm:text-base">
-                    Cash Payment
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground font-urdu">
-                    نقد ادائیگی
-                  </p>
-                </div>
-              </Link>
-            </Button>
-
-            <Button
-              asChild
-              variant="outline"
-              className="w-full justify-start h-auto py-2.5 sm:py-3 glass border-white/10"
-            >
-              <Link href="/dashboard/vouchers?type=201">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-blue-500/20 flex items-center justify-center mr-2 sm:mr-3">
-                  <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-sm sm:text-base">
-                    Journal Entry
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground font-urdu">
-                    جنرل اندراج
-                  </p>
-                </div>
-              </Link>
-            </Button>
-
-            <Button
-              asChild
-              variant="outline"
-              className="w-full justify-start h-auto py-2.5 sm:py-3 glass border-white/10"
-            >
-              <Link href="/dashboard/reports">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded bg-purple-500/20 flex items-center justify-center mr-2 sm:mr-3">
-                  <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-sm sm:text-base">
-                    View Reports
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground font-urdu">
-                    رپورٹس دیکھیں
-                  </p>
-                </div>
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Transactions */}
-      <Card className="glass-card">
-        <CardHeader className="flex flex-row items-center justify-between p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="hidden sm:inline">Recent Transactions</span>
-            <span className="sm:hidden">Recent</span>
-          </CardTitle>
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="text-xs sm:text-sm"
-          >
-            <Link href="/dashboard/reports">
-              <span className="hidden sm:inline">View All</span>
-              <span className="sm:hidden">All</span>
-              <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-1" />
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          {recentTransactions.length === 0 ? (
-            <div className="text-center py-6 sm:py-8 text-muted-foreground">
-              <FileText className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-              <p className="text-sm sm:text-base">No recent transactions</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <Table className="text-xs sm:text-sm glass-table">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16 sm:w-24 pl-4 sm:pl-0">
-                      Date
-                    </TableHead>
-                    <TableHead className="w-14 sm:w-20 hidden sm:table-cell">
-                      V.No
-                    </TableHead>
-                    <TableHead className="w-24 sm:w-32">Type</TableHead>
-                    <TableHead className="hidden md:table-cell">
-                      Account
-                    </TableHead>
-                    <TableHead className="hidden lg:table-cell">
-                      Narration
-                    </TableHead>
-                    <TableHead className="text-right w-20 sm:w-32 pr-4 sm:pr-0">
-                      Amount
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentTransactions.map((tx) => {
-                    const typeName = getVoucherTypeName(tx.voucherType);
-                    return (
-                      <TableRow key={tx.id}>
-                        <TableCell className="font-mono pl-4 sm:pl-0">
-                          {format(new Date(tx.date), "dd/MM/yy")}
-                        </TableCell>
-                        <TableCell className="font-mono hidden sm:table-cell">
-                          {tx.voucherNo || "-"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] sm:text-xs ${
-                              typeName.includes("Receipt")
-                                ? "border-green-500/50 text-green-400"
-                                : typeName.includes("Payment")
-                                ? "border-red-500/50 text-red-400"
-                                : "border-white/20"
-                            }`}
-                          >
-                            <span className="hidden sm:inline">{typeName}</span>
-                            <span className="sm:hidden">
-                              {typeName.split(" ")[0]}
-                            </span>
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="max-w-[120px] truncate hidden md:table-cell">
-                          {tx.accountName}
-                        </TableCell>
-                        <TableCell className="max-w-xs truncate hidden lg:table-cell">
-                          {tx.narration}
-                        </TableCell>
-                        <TableCell className="text-right font-mono pr-4 sm:pr-0">
-                          <span
-                            className={`flex items-center justify-end gap-0.5 sm:gap-1 ${
-                              tx.isDebit ? "text-green-400" : "text-red-400"
-                            }`}
-                          >
-                            {tx.isDebit ? (
-                              <ArrowUpRight className="h-3 w-3" />
-                            ) : (
-                              <ArrowDownRight className="h-3 w-3" />
-                            )}
-                            {formatCurrency(tx.amount)}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Summary Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="glass-card">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-sm sm:text-base">
-              Total Debits & Credits
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-            <div className="flex justify-between items-center">
               <div>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Total Debit
-                </p>
-                <p className="text-lg sm:text-xl font-bold text-green-400 tabular-nums">
-                  {formatCurrency(stats.totalDebit)}
-                </p>
-              </div>
-              <div className="h-10 sm:h-12 w-px bg-white/10" />
-              <div className="text-right">
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Total Credit
-                </p>
-                <p className="text-lg sm:text-xl font-bold text-red-400 tabular-nums">
-                  {formatCurrency(stats.totalCredit)}
-                </p>
+                <div className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                  {language === "ur" ? "کل اکاؤنٹس" : "Total Accounts"}
+                </div>
+                <div className="text-2xl sm:text-3xl font-bold">
+                  {stats.totalAccounts}
+                </div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground mt-2">
+                  {stats.totalTransactions.toLocaleString()}{" "}
+                  {language === "ur" ? "لین دین" : "transactions"}
+                </div>
               </div>
             </div>
-            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10">
-              <div className="flex justify-between items-center">
-                <span className="text-xs sm:text-sm text-muted-foreground">
-                  Difference
-                </span>
-                <span
-                  className={`font-bold text-sm sm:text-base tabular-nums ${
-                    stats.totalDebit - stats.totalCredit >= 0
-                      ? "text-green-400"
-                      : "text-red-400"
-                  }`}
-                >
-                  {formatCurrency(
-                    Math.abs(stats.totalDebit - stats.totalCredit)
-                  )}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card className="glass-card">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-sm sm:text-base">Quick Links</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 grid grid-cols-2 gap-2">
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="text-xs sm:text-sm h-8 sm:h-9 glass border-white/10"
-            >
-              <Link href="/dashboard/accounts">
-                <span className="hidden sm:inline">Chart of Accounts</span>
-                <span className="sm:hidden">Accounts</span>
+          {/* Recent Transactions */}
+          <div className="spotlight-card rounded-2xl p-0 overflow-hidden animate-in-right delay-100">
+            <div className="p-4 sm:p-5 border-b border-border flex justify-between items-center">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {language === "ur" ? "حالیہ" : "Recent"}
+              </h3>
+              <Link
+                href="/dashboard/reports"
+                className="text-xs text-foreground hover:underline"
+              >
+                {language === "ur" ? "سب دیکھیں" : "View All"}
               </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="text-xs sm:text-sm h-8 sm:h-9 glass border-white/10"
-            >
-              <Link href="/dashboard/ledger">
-                <span className="hidden sm:inline">Account</span> Ledger
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="text-xs sm:text-sm h-8 sm:h-9 glass border-white/10"
-            >
-              <Link href="/dashboard/reports?report=trial-balance">
-                Trial Balance
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="text-xs sm:text-sm h-8 sm:h-9 glass border-white/10"
-            >
-              <Link href="/dashboard/settings">Settings</Link>
-            </Button>
-          </CardContent>
-        </Card>
+            </div>
+
+            <div className="divide-y divide-border">
+              {recentTransactions.length === 0 ? (
+                <div className="p-6 sm:p-8 text-center text-muted-foreground">
+                  <FileText
+                    className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-3 opacity-50"
+                    strokeWidth={1.5}
+                  />
+                  <p className="text-xs sm:text-sm">
+                    {language === "ur"
+                      ? "کوئی حالیہ لین دین نہیں"
+                      : "No recent transactions"}
+                  </p>
+                </div>
+              ) : (
+                recentTransactions.slice(0, 5).map((tx) => {
+                  const typeInfo = VOUCHER_TYPE_MAP[tx.voucherType];
+                  const isIncome = typeInfo?.isReceipt;
+                  const isExpense = typeInfo?.isPayment;
+
+                  return (
+                    <Link
+                      key={tx.id}
+                      href={`/dashboard/vouchers/${tx.id}`}
+                      className="transaction-item hover:bg-secondary/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div
+                          className={`transaction-icon ${
+                            isIncome
+                              ? "!bg-emerald-500/20 !text-emerald-400"
+                              : isExpense
+                              ? "!bg-red-500/20 !text-red-400"
+                              : ""
+                          }`}
+                        >
+                          {isIncome ? (
+                            <ArrowDownRight
+                              className="w-3 h-3 sm:w-4 sm:h-4"
+                              strokeWidth={1.5}
+                            />
+                          ) : isExpense ? (
+                            <ArrowUpRight
+                              className="w-3 h-3 sm:w-4 sm:h-4"
+                              strokeWidth={1.5}
+                            />
+                          ) : (
+                            <FileText
+                              className="w-3 h-3 sm:w-4 sm:h-4"
+                              strokeWidth={1.5}
+                            />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs sm:text-sm font-medium text-foreground">
+                            {getVoucherTypeName(tx.voucherType)}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {tx.voucherNo ||
+                              format(new Date(tx.date), "dd MMM")}
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        className={`text-xs sm:text-sm font-medium ${
+                          isIncome
+                            ? "text-emerald-400"
+                            : isExpense
+                            ? "text-red-400"
+                            : "text-foreground"
+                        }`}
+                      >
+                        {isIncome ? "+" : isExpense ? "-" : ""}Rs.
+                        {tx.amount.toLocaleString()}
+                      </div>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

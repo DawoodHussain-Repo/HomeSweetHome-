@@ -352,19 +352,22 @@ export default function ReportsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Reports & View</h1>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight-custom">
+            Reports & View
+          </h1>
           <p className="text-muted-foreground mt-1">
             View transactions and generate financial reports
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
+          <button
+            onClick={handlePrint}
+            className="px-4 py-2 bg-secondary border border-border text-muted-foreground hover:bg-secondary/80 hover:text-foreground rounded-xl transition-all flex items-center gap-2"
+          >
+            <Printer className="h-4 w-4" />
             Print
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
+          </button>
+          <button
             onClick={() =>
               exportToCSV(
                 activeTab === "trial-balance"
@@ -373,101 +376,114 @@ export default function ReportsPage() {
                 activeTab
               )
             }
+            className="px-4 py-2 bg-secondary border border-border text-muted-foreground hover:bg-secondary/80 hover:text-foreground rounded-xl transition-all flex items-center gap-2"
           >
-            <Download className="h-4 w-4 mr-2" />
+            <Download className="h-4 w-4" />
             Export CSV
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Report Type Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-          <TabsTrigger value="transactions" className="flex items-center gap-2">
+        <TabsList className="grid grid-cols-4 w-full max-w-2xl bg-secondary p-1 rounded-xl">
+          <TabsTrigger
+            value="transactions"
+            className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg"
+          >
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Transactions</span>
           </TabsTrigger>
           <TabsTrigger
             value="trial-balance"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg"
           >
             <FileSpreadsheet className="h-4 w-4" />
             <span className="hidden sm:inline">Trial Balance</span>
           </TabsTrigger>
-          <TabsTrigger value="ledger" className="flex items-center gap-2">
+          <TabsTrigger
+            value="ledger"
+            className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg"
+          >
             <BookOpen className="h-4 w-4" />
             <span className="hidden sm:inline">Ledger</span>
           </TabsTrigger>
-          <TabsTrigger value="summary" className="flex items-center gap-2">
+          <TabsTrigger
+            value="summary"
+            className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg"
+          >
             <Scale className="h-4 w-4" />
             <span className="hidden sm:inline">Summary</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Date Range Selector - Common to all tabs */}
-        <Card className="mt-4">
-          <CardContent className="pt-4">
-            <DateRangeSelector
-              fromDate={fromDate}
-              toDate={toDate}
-              onFromDateChange={setFromDate}
-              onToDateChange={setToDate}
-              preset={datePreset}
-              onPresetChange={setDatePreset}
-            />
-          </CardContent>
-        </Card>
+        <div className="mt-4 spotlight-card bg-card backdrop-blur-xl rounded-2xl border border-border p-4">
+          <DateRangeSelector
+            fromDate={fromDate}
+            toDate={toDate}
+            onFromDateChange={setFromDate}
+            onToDateChange={setToDate}
+            preset={datePreset}
+            onPresetChange={setDatePreset}
+          />
+        </div>
 
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="space-y-4">
           {/* Filters */}
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by narration or voucher no..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
+          <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border border-border p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search by narration or voucher no..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
                 </div>
-                <Select value={filterType} onValueChange={setFilterType}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="Cash Receipt">Cash Receipt</SelectItem>
-                    <SelectItem value="Cash Payment">Cash Payment</SelectItem>
-                    <SelectItem value="Journal">Journal</SelectItem>
-                    <SelectItem value="Opening">Opening</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={fetchTransactions} disabled={loading}>
-                  <Filter className="h-4 w-4 mr-2" />
-                  Apply
-                </Button>
               </div>
-            </CardContent>
-          </Card>
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-48 bg-background border-border rounded-xl">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Cash Receipt">Cash Receipt</SelectItem>
+                  <SelectItem value="Cash Payment">Cash Payment</SelectItem>
+                  <SelectItem value="Journal">Journal</SelectItem>
+                  <SelectItem value="Opening">Opening</SelectItem>
+                </SelectContent>
+              </Select>
+              <button
+                onClick={fetchTransactions}
+                disabled={loading}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 transition-all flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                Apply
+              </button>
+            </div>
+          </div>
 
           {/* Transactions Table */}
-          <Card>
+          <div className="spotlight-card bg-card backdrop-blur-xl rounded-2xl border border-border overflow-hidden">
             <div ref={printRef}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Transaction List
-                  <Badge variant="secondary" className="ml-2">
+              <div className="p-6 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-foreground" />
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Transaction List
+                  </h3>
+                  <span className="ml-2 px-2 py-1 text-xs bg-secondary text-muted-foreground rounded-full">
                     {filteredTransactions.length} records
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                  </span>
+                </div>
+              </div>
+              <div className="p-6">
                 {loading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -481,57 +497,70 @@ export default function ReportsPage() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-24">Date</TableHead>
-                          <TableHead className="w-20">V.No</TableHead>
-                          <TableHead className="w-28">Type</TableHead>
-                          <TableHead>Narration</TableHead>
-                          <TableHead className="text-right w-28">
+                        <TableRow className="border-border hover:bg-transparent">
+                          <TableHead className="w-24 text-muted-foreground text-xs sm:text-sm">
+                            Date
+                          </TableHead>
+                          <TableHead className="w-20 text-muted-foreground text-xs sm:text-sm">
+                            V.No
+                          </TableHead>
+                          <TableHead className="w-28 text-muted-foreground text-xs sm:text-sm hidden sm:table-cell">
+                            Type
+                          </TableHead>
+                          <TableHead className="text-muted-foreground text-xs sm:text-sm">
+                            Narration
+                          </TableHead>
+                          <TableHead className="text-right w-24 sm:w-28 text-muted-foreground text-xs sm:text-sm">
                             Debit
                           </TableHead>
-                          <TableHead className="text-right w-28">
+                          <TableHead className="text-right w-24 sm:w-28 text-muted-foreground text-xs sm:text-sm">
                             Credit
                           </TableHead>
-                          <TableHead className="w-16"></TableHead>
+                          <TableHead className="w-10 sm:w-16"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredTransactions.map((tx) => (
-                          <TableRow key={tx.id}>
-                            <TableCell className="font-mono text-sm">
+                          <TableRow
+                            key={tx.id}
+                            className="border-border hover:bg-secondary/50"
+                          >
+                            <TableCell className="font-mono text-xs sm:text-sm text-muted-foreground">
                               {format(new Date(tx.date), "dd/MM/yy")}
                             </TableCell>
-                            <TableCell className="font-mono text-sm">
+                            <TableCell className="font-mono text-xs sm:text-sm text-muted-foreground">
                               {tx.voucherNo}
                             </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="outline"
-                                className={
+                            <TableCell className="hidden sm:table-cell">
+                              <span
+                                className={`px-2 py-1 text-xs rounded-full ${
                                   tx.type.includes("Receipt")
-                                    ? "border-green-500 text-green-600"
+                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                                     : tx.type.includes("Payment")
-                                    ? "border-red-500 text-red-600"
-                                    : ""
-                                }
+                                    ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                                    : "bg-secondary text-muted-foreground border border-border"
+                                }`}
                               >
                                 {tx.type}
-                              </Badge>
+                              </span>
                             </TableCell>
-                            <TableCell className="max-w-xs truncate">
+                            <TableCell className="max-w-[100px] sm:max-w-xs truncate text-foreground text-xs sm:text-sm">
                               {tx.narration}
                             </TableCell>
-                            <TableCell className="text-right font-mono text-green-600">
+                            <TableCell className="text-right font-mono text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">
                               {tx.debit > 0 && formatCurrency(tx.debit)}
                             </TableCell>
-                            <TableCell className="text-right font-mono text-red-600">
+                            <TableCell className="text-right font-mono text-xs sm:text-sm text-red-600 dark:text-red-400">
                               {tx.credit > 0 && formatCurrency(tx.credit)}
                             </TableCell>
                             <TableCell>
                               <Link href={`/dashboard/vouchers/${tx.id}`}>
-                                <Button variant="ghost" size="icon">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
+                                <button className="p-1.5 sm:p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors">
+                                  <Eye
+                                    className="h-3.5 w-3.5 sm:h-4 sm:w-4"
+                                    strokeWidth={1.5}
+                                  />
+                                </button>
                               </Link>
                             </TableCell>
                           </TableRow>
@@ -540,9 +569,9 @@ export default function ReportsPage() {
                     </Table>
                   </div>
                 )}
-              </CardContent>
+              </div>
             </div>
-          </Card>
+          </div>
         </TabsContent>
 
         {/* Trial Balance Tab */}
@@ -576,19 +605,25 @@ export default function ReportsPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-24">Code</TableHead>
-                          <TableHead>Account Name</TableHead>
-                          <TableHead className="w-24">Type</TableHead>
-                          <TableHead className="text-right w-28">
+                          <TableHead className="w-20 sm:w-24 text-xs sm:text-sm">
+                            Code
+                          </TableHead>
+                          <TableHead className="text-xs sm:text-sm">
+                            Account Name
+                          </TableHead>
+                          <TableHead className="w-20 sm:w-24 hidden md:table-cell text-xs sm:text-sm">
+                            Type
+                          </TableHead>
+                          <TableHead className="text-right w-24 sm:w-28 hidden lg:table-cell text-xs sm:text-sm">
                             Opening
                           </TableHead>
-                          <TableHead className="text-right w-28">
+                          <TableHead className="text-right w-24 sm:w-28 text-xs sm:text-sm">
                             Debit
                           </TableHead>
-                          <TableHead className="text-right w-28">
+                          <TableHead className="text-right w-24 sm:w-28 text-xs sm:text-sm">
                             Credit
                           </TableHead>
-                          <TableHead className="text-right w-28">
+                          <TableHead className="text-right w-24 sm:w-28 text-xs sm:text-sm">
                             Closing
                           </TableHead>
                         </TableRow>
@@ -596,26 +631,31 @@ export default function ReportsPage() {
                       <TableBody>
                         {trialBalance.map((row) => (
                           <TableRow key={row.id}>
-                            <TableCell className="font-mono text-sm">
+                            <TableCell className="font-mono text-xs sm:text-sm">
                               {row.accountCode}
                             </TableCell>
-                            <TableCell>{row.accountName}</TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="capitalize">
+                            <TableCell className="text-xs sm:text-sm">
+                              {row.accountName}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <Badge
+                                variant="outline"
+                                className="capitalize text-[10px] sm:text-xs"
+                              >
                                 {row.accountType}
                               </Badge>
                             </TableCell>
-                            <TableCell className="text-right font-mono">
+                            <TableCell className="text-right font-mono text-xs sm:text-sm hidden lg:table-cell">
                               {formatCurrency(row.openingBalance)}
                             </TableCell>
-                            <TableCell className="text-right font-mono text-green-600">
+                            <TableCell className="text-right font-mono text-xs sm:text-sm text-green-600">
                               {formatCurrency(row.totalDebit)}
                             </TableCell>
-                            <TableCell className="text-right font-mono text-red-600">
+                            <TableCell className="text-right font-mono text-xs sm:text-sm text-red-600">
                               {formatCurrency(row.totalCredit)}
                             </TableCell>
                             <TableCell
-                              className={`text-right font-mono font-medium ${
+                              className={`text-right font-mono font-medium text-xs sm:text-sm ${
                                 row.closingBalance >= 0
                                   ? "text-green-600"
                                   : "text-red-600"
@@ -627,16 +667,31 @@ export default function ReportsPage() {
                         ))}
                         {/* Totals */}
                         <TableRow className="bg-muted/50 font-bold">
-                          <TableCell colSpan={4} className="text-right">
+                          <TableCell
+                            colSpan={2}
+                            className="text-right text-xs sm:text-sm md:hidden"
+                          >
                             TOTAL
                           </TableCell>
-                          <TableCell className="text-right text-green-600">
+                          <TableCell
+                            colSpan={4}
+                            className="text-right text-xs sm:text-sm hidden md:table-cell lg:hidden"
+                          >
+                            TOTAL
+                          </TableCell>
+                          <TableCell
+                            colSpan={4}
+                            className="text-right text-xs sm:text-sm hidden lg:table-cell"
+                          >
+                            TOTAL
+                          </TableCell>
+                          <TableCell className="text-right text-green-600 text-xs sm:text-sm">
                             {formatCurrency(totalDebit)}
                           </TableCell>
-                          <TableCell className="text-right text-red-600">
+                          <TableCell className="text-right text-red-600 text-xs sm:text-sm">
                             {formatCurrency(totalCredit)}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right text-xs sm:text-sm">
                             {Math.abs(totalDebit - totalCredit) < 0.01 ? (
                               <span className="text-green-600">✓ Balanced</span>
                             ) : (

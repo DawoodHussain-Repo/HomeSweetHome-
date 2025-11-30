@@ -92,15 +92,15 @@ export default function NewAccountPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/dashboard/accounts"
-          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors"
         >
           <ArrowLeft size={20} />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
             {t("accounts.addNew")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground text-sm sm:text-base">
             Create a new account in your chart of accounts
           </p>
         </div>
@@ -109,18 +109,18 @@ export default function NewAccountPage() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-6"
+        className="bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-border space-y-6"
       >
         {error && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400 text-sm">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Account Code */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               {t("accounts.code")} *
             </label>
             <input
@@ -130,14 +130,14 @@ export default function NewAccountPage() {
               onChange={(e) =>
                 setFormData({ ...formData, account_code: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
               placeholder="e.g., 10100"
             />
           </div>
 
           {/* Account Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               {t("accounts.type")} *
             </label>
             <select
@@ -149,7 +149,7 @@ export default function NewAccountPage() {
                   account_type: e.target.value as Account["account_type"],
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
             >
               <option value="asset">{t("accounts.asset")}</option>
               <option value="liability">{t("accounts.liability")}</option>
@@ -161,7 +161,7 @@ export default function NewAccountPage() {
 
           {/* Account Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               {t("accounts.name")} (English) *
             </label>
             <input
@@ -171,14 +171,14 @@ export default function NewAccountPage() {
               onChange={(e) =>
                 setFormData({ ...formData, account_name: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
               placeholder="Account Name"
             />
           </div>
 
           {/* Account Name Urdu */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               {t("accounts.name")} (اردو)
             </label>
             <input
@@ -188,14 +188,14 @@ export default function NewAccountPage() {
               onChange={(e) =>
                 setFormData({ ...formData, account_name_urdu: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
               placeholder="کھاتے کا نام"
             />
           </div>
 
           {/* Parent Account */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               Parent Account
             </label>
             <select
@@ -203,7 +203,7 @@ export default function NewAccountPage() {
               onChange={(e) =>
                 setFormData({ ...formData, parent_id: e.target.value })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
             >
               <option value="">-- No Parent (Root Account) --</option>
               {accounts.map((account) => (
@@ -223,9 +223,9 @@ export default function NewAccountPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, is_header: e.target.checked })
                 }
-                className="w-5 h-5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                className="w-4 h-4 sm:w-5 sm:h-5 text-primary border-border rounded focus:ring-primary"
               />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-xs sm:text-sm font-medium text-foreground">
                 This is a header/group account (cannot post transactions)
               </span>
             </label>
@@ -233,7 +233,7 @@ export default function NewAccountPage() {
 
           {/* Opening Balance */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               Opening Balance
             </label>
             <input
@@ -246,14 +246,14 @@ export default function NewAccountPage() {
                   opening_balance: parseFloat(e.target.value) || 0,
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
               placeholder="0.00"
             />
           </div>
 
           {/* Balance Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-xs sm:text-sm font-medium text-foreground mb-1">
               Balance Type
             </label>
             <select
@@ -264,7 +264,7 @@ export default function NewAccountPage() {
                   balance_type: e.target.value as "debit" | "credit",
                 })
               }
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-3 sm:px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background text-foreground text-sm"
             >
               <option value="debit">Debit</option>
               <option value="credit">Credit</option>
@@ -273,22 +273,22 @@ export default function NewAccountPage() {
         </div>
 
         {/* Submit Buttons */}
-        <div className="flex items-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center gap-4 pt-4 border-t border-border">
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground text-sm font-medium rounded-lg transition-colors"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Save size={20} />
+              <Save size={18} />
             )}
             {t("common.save")}
           </button>
           <Link
             href="/dashboard/accounts"
-            className="px-6 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium rounded-lg transition-colors"
+            className="px-4 sm:px-6 py-2 text-muted-foreground hover:bg-secondary text-sm font-medium rounded-lg transition-colors"
           >
             {t("common.cancel")}
           </Link>
