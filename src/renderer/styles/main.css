@@ -1,0 +1,394 @@
+/* HSH Accounting - Main Styles
+ * Design: Boxy, Dark Blue (#1e3a8a), Black Borders
+ */
+
+:root {
+  /* Colors - Dark Blue Theme */
+  --color-primary: #1e3a8a;
+  --color-primary-hover: #1e40af;
+  --color-bg: #ffffff;
+  --color-fg: #000000;
+  --color-muted: #f3f4f6;
+  --color-muted-fg: #6b7280;
+  --color-border: #000000;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  
+  /* Shadows - Boxy */
+  --shadow-sm: 2px 2px 0 0 rgba(0,0,0,1);
+  --shadow-md: 3px 3px 0 0 rgba(0,0,0,1);
+  --shadow-lg: 4px 4px 0 0 rgba(0,0,0,1);
+  
+  /* Layout */
+  --sidebar-width: 280px;
+  --titlebar-height: 32px;
+  
+  /* Font */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-urdu: "Jameel Noori Nastaleeq", "Noto Nastaliq Urdu", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-fg);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+/* Urdu Support */
+.urdu-text, [lang="ur"], .form-input-urdu, .form-textarea-urdu {
+  font-family: var(--font-urdu);
+  direction: rtl;
+  text-align: right;
+  font-size: 16px;
+  line-height: 2;
+}
+
+/* Title Bar */
+.titlebar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--titlebar-height);
+  background: var(--color-primary);
+  border-bottom: 2px solid black;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10000;
+  user-select: none;
+}
+
+.titlebar-drag-region {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  height: 100%;
+  -webkit-app-region: drag;
+}
+
+.titlebar-icon {
+  width: 20px; height: 20px;
+  background: white;
+  border: 1px solid black;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebar-icon img { width: 100%; height: 100%; object-fit: contain; }
+
+.titlebar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.titlebar-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-button {
+  width: 46px; height: 100%;
+  border: none;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebar-button:hover { background: rgba(255,255,255,0.1); }
+.titlebar-button.titlebar-close:hover { background: #dc2626; }
+
+/* App Layout */
+#app {
+  display: flex;
+  height: calc(100vh - var(--titlebar-height));
+  margin-top: var(--titlebar-height);
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background: white;
+  border-right: 3px solid black;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 24px 16px;
+  border-bottom: 2px solid black;
+}
+
+.logo-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.logo-large img { width: 140px; height: 140px; object-fit: contain; }
+.logo-title { font-size: 18px; font-weight: 700; color: black; }
+.logo-subtitle { font-size: 14px; font-weight: 600; color: black; letter-spacing: 0.05em; }
+
+.sidebar-nav { flex: 1; padding: 16px; overflow-y: auto; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin: 4px 0;
+  color: black;
+  text-decoration: none;
+  border: 2px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+  background: white;
+  transition: all 0.15s ease;
+}
+
+.nav-item:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: black;
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-item.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: black;
+  box-shadow: var(--shadow-md);
+}
+
+.nav-item svg { width: 18px; height: 18px; }
+.sidebar-footer { padding: 16px; border-top: 2px solid black; }
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+#page-content {
+  flex: 1;
+  padding: var(--sp-8);
+  overflow-y: auto;
+}
+
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--sp-8);
+  padding: var(--sp-6);
+  background: white;
+  border: 3px solid black;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: var(--color-primary);
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: black;
+  text-transform: uppercase;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--color-muted-fg);
+  margin: 0;
+  font-weight: 500;
+}
+
+.page-actions { display: flex; gap: 8px; }
+
+/* Cards */
+.card {
+  background: white;
+  border: 2px solid black;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--sp-4);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+  border-bottom: 2px solid black;
+  position: relative;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--color-primary);
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: black;
+  text-transform: uppercase;
+}
+
+.card-description {
+  font-size: 13px;
+  color: var(--color-muted-fg);
+  margin-top: 4px;
+}
+
+.card-body { padding: var(--sp-4); }
+
+/* Tables */
+.table-container {
+  width: 100%;
+  overflow: auto;
+  border: 2px solid black;
+  box-shadow: var(--shadow-lg);
+}
+
+.report-card .table-container {
+  border: 2px solid black;
+  box-shadow: none;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead { background: white; border-bottom: 2px solid black; }
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: black;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-right: 2px solid black;
+}
+
+th:last-child { border-right: 0; }
+th.text-right { text-align: right; }
+
+td {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid black;
+  border-right: 2px solid black;
+}
+
+td:last-child { border-right: 0; }
+td.text-right { text-align: right; font-variant-numeric: tabular-nums; }
+
+tbody tr { background: white; }
+tbody tr:hover { background: rgba(30,58,138,0.05); }
+tbody tr:last-child td { border-bottom: none; }
+
+/* Report tables - no hover */
+.report-table tbody tr:hover { background: white; }
+
+/* Amount colors */
+.amount-debit { color: var(--color-danger); font-weight: 600; }
+.amount-credit { color: var(--color-success); font-weight: 600; }
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--color-muted-fg);
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: black;
+  margin-bottom: 8px;
+}
+
+/* Loading */
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--color-muted);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #e5e7eb; }
+::-webkit-scrollbar-thumb { background: var(--color-primary); border: 1px solid black; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-primary-hover); }
+
+/* Utilities */
+.hidden { display: none !important; }
+.text-right { text-align: right; }
+
+/* Print */
+@media print {
+  .no-print, .sidebar { display: none !important; }
+  #page-content { padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ddd; }
+}

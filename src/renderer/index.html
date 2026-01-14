@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;" />
+  <title>HSH Accounting</title>
+  <link rel="stylesheet" href="styles/app.css" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+  <link rel="stylesheet" href="styles/print.css" media="print" />
+</head>
+
+<body>
+  <!-- Custom Title Bar -->
+  <div class="titlebar">
+    <div class="titlebar-drag-region">
+      <div class="titlebar-icon">
+        <img src="../assets/Logo.png" alt="HSH Logo">
+      </div>
+      <div class="titlebar-title">HSH Accounting System</div>
+    </div>
+    <div class="titlebar-controls">
+      <button class="titlebar-button" id="minimize-btn" title="Minimize">
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <rect x="0" y="5" width="12" height="2" fill="currentColor" />
+        </svg>
+      </button>
+      <button class="titlebar-button" id="maximize-btn" title="Maximize">
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <rect x="1" y="1" width="10" height="10" stroke="currentColor" stroke-width="1.5" fill="none" />
+        </svg>
+      </button>
+      <button class="titlebar-button titlebar-close" id="close-btn" title="Close">
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <path d="M1 1 L11 11 M11 1 L1 11" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-large">
+          <img src="../assets/Logo.png" alt="HSH Logo">
+          <div class="logo-text">
+            <span class="logo-subtitle">Accounting System</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="vouchers">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <span>Vouchers</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="accounts">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Accounts</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="reports">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span>Reports</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="manage-voucher">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <span>Manage Voucher</span>
+        </a>
+
+        <a href="#" class="nav-item" data-page="calculator">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="2" width="16" height="20" rx="2"></rect>
+            <line x1="8" y1="6" x2="16" y2="6"></line>
+            <line x1="8" y1="10" x2="8" y2="10"></line>
+            <line x1="12" y1="10" x2="12" y2="10"></line>
+            <line x1="16" y1="10" x2="16" y2="10"></line>
+            <line x1="8" y1="14" x2="8" y2="14"></line>
+            <line x1="12" y1="14" x2="12" y2="14"></line>
+            <line x1="16" y1="14" x2="16" y2="14"></line>
+            <line x1="8" y1="18" x2="8" y2="18"></line>
+            <line x1="12" y1="18" x2="12" y2="18"></line>
+            <line x1="16" y1="18" x2="16" y2="18"></line>
+          </svg>
+          <span>Calculator</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="#" class="nav-item" data-page="settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+          <span>Settings</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <div id="page-content"></div>
+    </main>
+  </div>
+
+  <!-- Modal Container -->
+  <div id="modal-container" class="modal-container hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title"></h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/components/SearchableSelect.js"></script>
+  <script src="js/pages/settings.js"></script>
+  <script type="module" src="js/app.js"></script>
+
+  <!-- Title Bar Controls -->
+  <script>
+    document.getElementById('minimize-btn').addEventListener('click', () => {
+      window.api.window.minimize();
+    });
+
+    document.getElementById('maximize-btn').addEventListener('click', () => {
+      window.api.window.maximize();
+    });
+
+    document.getElementById('close-btn').addEventListener('click', () => {
+      window.api.window.close();
+    });
+  </script>
+</body>
+
+</html>

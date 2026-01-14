@@ -1,0 +1,56 @@
+{
+  "name": "accounting-app",
+  "version": "1.0.0",
+  "description": "Professional offline-first desktop accounting application",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable",
+    "build:fast": "electron-builder --win portable --config.compression=store",
+    "build:dir": "electron-builder --win --dir",
+    "migrate": "node scripts/reimport-complete-data.js",
+    "verify": "node scripts/check-data-completeness.js"
+  },
+  "author": "HomeSweetHome",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "fuse.js": "^7.0.0",
+    "papaparse": "^5.4.1",
+    "sql.js": "^1.10.0"
+  },
+  "build": {
+    "appId": "com.hsh.accounting",
+    "productName": "HSH Accounting",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "node_modules/fuse.js/**/*",
+      "node_modules/papaparse/**/*",
+      "node_modules/sql.js/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "app-data",
+        "to": "app-data",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "src/assets/Logo.png"
+    },
+    "portable": {
+      "artifactName": "HSH-Accounting-${version}.exe"
+    },
+    "asar": true,
+    "compression": "normal"
+  }
+}

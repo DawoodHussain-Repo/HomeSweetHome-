@@ -1,0 +1,128 @@
+/* HSH Accounting - App Specific Styles
+ * Additional component overrides and utilities
+ */
+
+/* Modal table overrides - disable hover effects */
+.voucher-details-table tbody tr,
+.edit-voucher-table tbody tr,
+.modal-body table tbody tr {
+  position: static !important;
+}
+
+.voucher-details-table tbody tr::before,
+.edit-voucher-table tbody tr::before,
+.modal-body table tbody tr::before {
+  display: none !important;
+}
+
+.voucher-details-table tbody tr:hover,
+.edit-voucher-table tbody tr:hover,
+.modal-body table tbody tr:hover {
+  background: white !important;
+}
+
+/* Entry account container for journal vouchers */
+.entry-account-container {
+  position: relative;
+  min-width: 300px;
+}
+
+/* Ensure table cells don't clip dropdowns */
+table td { overflow: visible !important; }
+.entry-account-container .searchable-select-dropdown { z-index: 1001; }
+
+/* Stat Cards */
+.stat-card {
+  background: white;
+  border: 2px solid black;
+  padding: 20px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--color-primary);
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--color-muted-fg);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: black;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: white;
+  border: 2px solid black;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  color: black;
+}
+
+h1 { font-size: 32px; font-weight: 800; text-transform: uppercase; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+h4 { font-size: 18px; font-weight: 600; }
+
+/* Utility Classes */
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+
+.p-4 { padding: 16px; }
+.p-6 { padding: 24px; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+
+.grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+.w-full { width: 100%; }
+.text-center { text-align: center; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.uppercase { text-transform: uppercase; }

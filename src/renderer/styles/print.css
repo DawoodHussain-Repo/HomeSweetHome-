@@ -1,0 +1,216 @@
+/* Print Styles for Reports */
+@media print {
+  /* Hide non-printable elements */
+  .sidebar,
+  .page-actions,
+  .filter-bar,
+  .report-filter-section,
+  .btn,
+  .modal-container,
+  .toast-container,
+  .action-buttons,
+  .no-print,
+  .tabs,
+  .page-subtitle {
+    display: none !important;
+  }
+
+  /* Reset layout */
+  body {
+    background: white;
+    font-size: 11pt;
+    color: black;
+  }
+
+  #app {
+    display: block;
+  }
+
+  .main-content {
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+
+  #page-content {
+    padding: 0;
+    max-width: none;
+    margin: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .card-header {
+    display: none;
+  }
+
+  /* Report Header */
+  .report-header {
+    text-align: center;
+    margin-bottom: 30pt;
+    padding-bottom: 15pt;
+    border-bottom: 2pt solid black;
+  }
+
+  .report-company-name {
+    font-size: 20pt;
+    font-weight: bold;
+    margin-bottom: 8pt;
+    text-transform: uppercase;
+  }
+
+  .report-title {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-bottom: 6pt;
+  }
+
+  .report-date-range {
+    font-size: 11pt;
+    color: #666;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8pt;
+    text-align: left;
+  }
+
+  th {
+    background: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-weight: bold;
+  }
+
+  /* Amount columns */
+  .text-right {
+    text-align: right;
+  }
+
+  .amount-debit {
+    color: black;
+  }
+
+  .amount-credit {
+    color: black;
+  }
+
+  /* Totals row */
+  .totals-row {
+    font-weight: bold;
+    border-top: 2pt solid black;
+  }
+
+  .totals-row td {
+    border-top: 2pt solid black;
+  }
+
+  /* Report sections */
+  .report-section {
+    margin-bottom: 24pt;
+  }
+
+  .report-section-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin-bottom: 12pt;
+    padding-bottom: 4pt;
+    border-bottom: 1pt solid #999;
+  }
+
+  /* Summary boxes */
+  .report-summary {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24pt;
+    padding-top: 12pt;
+    border-top: 2pt solid black;
+  }
+
+  .report-summary-item {
+    text-align: center;
+  }
+
+  .report-summary-label {
+    font-size: 10pt;
+    color: #666;
+  }
+
+  .report-summary-value {
+    font-size: 14pt;
+    font-weight: bold;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* Footer */
+  .report-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 9pt;
+    color: #999;
+    padding: 12pt;
+    border-top: 1pt solid #ddd;
+  }
+
+  /* A4 page setup */
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+
+  /* Ledger specific */
+  .ledger-opening-balance {
+    font-style: italic;
+    background: #f9f9f9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ledger-closing-balance {
+    font-weight: bold;
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Balance Sheet specific */
+  .balance-sheet-section {
+    margin-bottom: 16pt;
+  }
+
+  .balance-sheet-total {
+    font-weight: bold;
+    border-top: 1pt solid black;
+  }
+
+  .balance-sheet-grand-total {
+    font-weight: bold;
+    font-size: 12pt;
+    border-top: 2pt double black;
+  }
+}
